@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_appName__",
+  "version": "0.1.0",
+  "description": "__MSG_appDesc__",
+  "default_locale": "tr",
+  "icons": {
+    "16": "icons/dtnot-16.png",
+    "32": "icons/dtnot-32.png",
+    "48": "icons/dtnot-48.png",
+    "96": "icons/dtnot-96.png",
+    "128": "icons/dtnot-128.png"
+  },
+  "action": {
+    "default_title": "DTNoT",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/dtnot-16.png",
+      "32": "icons/dtnot-32.png",
+      "48": "icons/dtnot-48.png"
+    }
+  },
+  "background": {
+    "scripts": ["assets/store.js", "assets/i18n.js", "background.js"],
+    "service_worker": "background.js"
+  },
+  "options_ui": { "page": "options.html", "open_in_tab": true },
+  "permissions": ["storage", "scripting", "contextMenus", "activeTab"],
+  "optional_host_permissions": ["*://*/*"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "dtnot@dijitalturk",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": { "required": ["none"] }
+    }
+  }
+}
