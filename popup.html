@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DTNoT</title>
+  <link rel="stylesheet" href="assets/ui.css" />
+</head>
+<body class="popup">
+  <header class="ust">
+    <div class="marka">DTNoT<small id="altBaslik">Sayfada not bırak</small></div>
+    <div id="diller" class="diller" role="group" aria-label="Dil"></div>
+    <button type="button" id="panelAc" class="ikon-dugme" title="Notlarım" aria-label="Notlarım">≡</button>
+    <button type="button" id="ayarAc" class="ikon-dugme" title="Ayarlar" aria-label="Ayarlar">⚙</button>
+  </header>
+
+  <div class="govde">
+    <div id="bildirim" class="durum" role="status" aria-live="polite"></div>
+
+    <section id="izinKutu" class="uyari" hidden>
+      <b id="izinBaslik"></b>
+      <div id="izinMetin" style="margin-top:4px"></div>
+      <div class="satir" style="margin-top:8px">
+        <button type="button" id="izinVer" class="dugme dugme--kucuk"></button>
+      </div>
+    </section>
+
+    <section class="kart">
+      <div class="satir aralik">
+        <div>
+          <div class="etiket" id="sayfaEtiket">Bu sayfa</div>
+          <div id="sayfaAdres" class="ipucu">…</div>
+        </div>
+        <span id="canliRozet" class="rozet" hidden>✓</span>
+      </div>
+
+      <div class="satir" style="margin-top:10px">
+        <button type="button" id="ekleAc" class="dugme">Not ekle</button>
+        <button type="button" id="silDugme" class="dugme dugme--tehlike dugme--kucuk" hidden>Sil</button>
+      </div>
+
+      <div id="ekleKutu" class="dikey" style="margin-top:10px" hidden>
+        <textarea id="metin" class="alan" maxlength="4000"></textarea>
+        <div class="satir">
+          <button type="button" id="kaydet" class="dugme">Kaydet</button>
+          <button type="button" id="vazgec" class="dugme dugme--ikincil">Vazgeç</button>
+        </div>
+      </div>
+
+      <p id="notOnizleme" class="ipucu" style="margin-top:10px" hidden></p>
+    </section>
+
+    <section class="kart">
+      <div class="satir aralik">
+        <h2 id="havuzBaslik">Notlarım</h2>
+        <span id="toplamRozet" class="rozet">0</span>
+      </div>
+      <p class="ipucu" style="margin-top:6px" id="havuzNotu"></p>
+      <div class="satir" style="margin-top:8px">
+        <button type="button" id="panelDugme" class="dugme dugme--ikincil dugme--kucuk">Tüm notlar</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="assets/store.js"></script>
+  <script src="assets/i18n.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

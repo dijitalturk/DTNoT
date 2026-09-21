@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "DTNoT — Sayfada Not Bırak",
+    "description": "Eklenti adı (mağaza listelemesi)"
+  },
+  "appDesc": {
+    "message": "Gezindiğin web sayfalarına not bırak; aynı sayfaya döndüğünde notun sol altta post-it olarak karşına çıksın.",
+    "description": "Eklenti açıklaması (mağaza listelemesi)"
+  }
+}
