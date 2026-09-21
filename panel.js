@@ -12,6 +12,7 @@
   let arama = '';
   let sadeceAktif = false;
   let aktifHost = '';
+  let renkFiltre = 'tumu';
   let duzenlenen = null; // anahtar
   let mesaj = { metin: '', tur: '' };
 
@@ -35,8 +36,34 @@
     $('altBaslik').textContent = T('panel.altbaslik');
     $('arama').placeholder = T('panel.ara');
     $('sadeceAktifEtiket').textContent = T('panel.sadeceAktif');
+    $('renkFiltreEtiket').textContent = T('panel.renkFiltre');
     $('ayarAc').title = T('ortak.ayarlar');
     I.bayraklar($('diller'));
+    renkFiltreCiz();
+  }
+
+  /** Renk filtresi düğmeleri: "Tümü" + 6 renk (palet tek kaynaktan). */
+  function renkFiltreCiz() {
+    const kap = $('renkFiltre');
+    kap.textContent = '';
+    const secenekler = [['tumu', null]].concat((S.RENKLER || []).map((r) => [r, (S.PALET || {})[r] || {}]));
+    secenekler.forEach(([deger, p]) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'renk-sec';
+      if (p) {
+        b.style.background = p.bg;
+        b.style.borderColor = p.kenar;
+      } else {
+        b.style.background = 'linear-gradient(135deg,#fdf6c9 0 25%,#dcf5e4 25% 50%,#dbeafe 50% 75%,#fde2ef 75% 100%)';
+        b.style.borderColor = 'var(--cizgi)';
+      }
+      b.setAttribute('aria-pressed', String(renkFiltre === deger));
+      b.setAttribute('aria-label', deger === 'tumu' ? T('ortak.tumu') : T('renk.' + deger));
+      b.title = deger === 'tumu' ? T('ortak.tumu') : T('renk.' + deger);
+      b.addEventListener('click', () => { renkFiltre = deger; renkFiltreCiz(); ciz(); });
+      kap.appendChild(b);
+    });
   }
 
   function bildir() {
@@ -46,23 +73,13 @@
     el.textContent = mesaj.metin || '';
   }
 
-  /** TR/EN için tutarlı küçük harfe çevirme: 'İkinci' ↔ 'ikinci' eşleşsin.
-      (Sorgu ve metin AYNI fonksiyondan geçmeli — TR İ'nin birleşen noktası tuzağı.) */
-  function katla(s) {
-    return String(s == null ? '' : s)
-      .toLocaleLowerCase(I.dil() === 'tr' ? 'tr' : 'en')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
-  }
-
   function suzulmus() {
-    let liste = notlar;
-    if (sadeceAktif && aktifHost) liste = liste.filter((k) => (k.host || S.hostOf(k.anahtar)) === aktifHost);
-    const q = katla(arama.trim());
-    if (q) {
-      liste = liste.filter((k) => katla(k.anahtar).indexOf(q) !== -1 || katla(k.metin).indexOf(q) !== -1);
-    }
-    return liste;
+    return S.filtrele(notlar, {
+      q: arama,
+      renk: renkFiltre,
+      host: sadeceAktif ? aktifHost : '',
+      dil: I.dil(),
+    });
   }
 
   function dugme(etiket, sinif, tiklama) {
@@ -79,11 +96,25 @@
     satir.className = 'not-satir';
 
     const sol = document.createElement('div');
+    const ust = document.createElement('div');
+    ust.className = 'flex items-center gap-2';
+    const nokta = document.createElement('span');
+    nokta.className = 'renk-nokta';
+    nokta.style.background = ((S.PALET || {})[k.renk] || {}).bg || '';
+    nokta.title = T('renk.' + (k.renk || 'sari'));
+    ust.appendChild(nokta);
     const yol = document.createElement('div');
-    yol.className = 'not-yol';
+    yol.className = 'not-yol truncate';
     yol.title = k.anahtar;
-    yol.textContent = k.yol;
-    sol.appendChild(yol);
+    yol.textContent = S.kisaltOrtadan(k.yol, 58);
+    ust.appendChild(yol);
+    if (k.banner === true) {
+      const rb = document.createElement('span');
+      rb.className = 'rozet rozet-banner';
+      rb.textContent = k.siteGeneli === true ? 'BANNER · SITE' : 'BANNER';
+      ust.appendChild(rb);
+    }
+    sol.appendChild(ust);
 
     if (duzenlenen === k.anahtar) {
       const alan = document.createElement('textarea');
@@ -91,11 +122,86 @@
       alan.value = k.metin;
       alan.style.marginTop = '6px';
       sol.appendChild(alan);
+
+      const yerel = { renk: k.renk || 'sari', banner: k.banner === true, siteGeneli: k.siteGeneli === true };
+
+      const satirRenk = document.createElement('div');
+      satirRenk.className = 'flex items-center gap-2 flex-wrap';
+      satirRenk.style.marginTop = '8px';
+      const etiketRenk = document.createElement('span');
+      etiketRenk.className = 'etiket';
+      etiketRenk.textContent = T('not.renk');
+      satirRenk.appendChild(etiketRenk);
+      const renkKap = document.createElement('div');
+      renkKap.className = 'renkler';
+      (S.RENKLER || []).forEach((r) => {
+        const p = (S.PALET || {})[r] || {};
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'renk-sec';
+        b.style.background = p.bg;
+        b.style.borderColor = p.kenar;
+        b.setAttribute('aria-pressed', String(yerel.renk === r));
+        b.title = T('renk.' + r);
+        b.addEventListener('click', () => {
+          yerel.renk = r;
+          Array.from(renkKap.children).forEach((c, i) => c.setAttribute('aria-pressed', String((S.RENKLER[i] || '') === r)));
+        });
+        renkKap.appendChild(b);
+      });
+      satirRenk.appendChild(renkKap);
+      sol.appendChild(satirRenk);
+
+      const kutuBanner = document.createElement('label');
+      kutuBanner.className = 'onay';
+      const chkBanner = document.createElement('input');
+      chkBanner.type = 'checkbox';
+      chkBanner.checked = yerel.banner;
+      const spBanner = document.createElement('span');
+      spBanner.textContent = T('not.banner');
+      kutuBanner.appendChild(chkBanner);
+      kutuBanner.appendChild(spBanner);
+      sol.appendChild(kutuBanner);
+
+      const kutuSite = document.createElement('label');
+      kutuSite.className = 'onay';
+      const chkSite = document.createElement('input');
+      chkSite.type = 'checkbox';
+      chkSite.checked = yerel.siteGeneli;
+      chkSite.disabled = !yerel.banner;
+      const spSite = document.createElement('span');
+      spSite.textContent = T('not.siteGeneli');
+      kutuSite.appendChild(chkSite);
+      kutuSite.appendChild(spSite);
+      sol.appendChild(kutuSite);
+
+      const ipucuSite = document.createElement('p');
+      ipucuSite.className = 'ipucu';
+      ipucuSite.textContent = T('not.siteGeneliNot');
+      sol.appendChild(ipucuSite);
+
+      chkBanner.addEventListener('change', () => {
+        yerel.banner = chkBanner.checked;
+        chkSite.disabled = !yerel.banner;
+        if (!yerel.banner) { chkSite.checked = false; yerel.siteGeneli = false; }
+      });
+      chkSite.addEventListener('change', () => { yerel.siteGeneli = chkSite.checked; });
+
       const alt = document.createElement('div');
       alt.className = 'not-alt';
       alt.appendChild(dugme(T('ortak.kaydet'), '', async () => {
         if (!alan.value.trim()) { mesaj = { metin: T('popup.metinGerekli'), tur: 'hata' }; bildir(); return; }
-        const r = await cagri('NOT_GUNCELLE', { anahtar: k.anahtar, patch: { metin: alan.value, kucuk: false, gizleUntil: 0 } });
+        const r = await cagri('NOT_GUNCELLE', {
+          anahtar: k.anahtar,
+          patch: {
+            metin: alan.value,
+            renk: yerel.renk,
+            banner: yerel.banner,
+            siteGeneli: yerel.siteGeneli,
+            kucuk: false,
+            gizleUntil: 0,
+          },
+        });
         duzenlenen = null;
         mesaj = r ? { metin: T('popup.kaydedildi'), tur: 'tamam' } : { metin: T('popup.kaydetHata'), tur: 'hata' };
         await yukle();
@@ -103,8 +209,7 @@
       alt.appendChild(dugme(T('ortak.vazgec'), 'dugme--ikincil', () => { duzenlenen = null; ciz(); }));
       sol.appendChild(alt);
       satir.appendChild(sol);
-      const bos = document.createElement('div');
-      satir.appendChild(bos);
+      satir.appendChild(document.createElement('div'));
       return satir;
     }
 

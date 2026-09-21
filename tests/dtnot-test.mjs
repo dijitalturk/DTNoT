@@ -212,7 +212,7 @@ await test('content.js: Promise dönüşü yok, sendResponse var', () => {
 await test('içerik betiği depo/normalizeUrl kopyası İÇERMİYOR (tek kaynak)', () => {
   const kod = oku('content.js');
   assert.ok(!/function normalizeUrl/.test(kod), 'content.js içinde normalizeUrl kopyası var!');
-  assert.match(kod, /DTNOT_STORE\.normalizeUrl/);
+  assert.match(kod, /S\.normalizeUrl/);
 });
 
 /* ================= 4) Manifest / paket kilidi ================= */
@@ -265,12 +265,183 @@ await test('ui.css: [hidden] kuralı var (all: unset gizlemeyi ezmesin)', () => 
   const css = oku('assets/ui.css');
   assert.match(css, /\[hidden\]\s*\{\s*display:\s*none\s*!important/, '[hidden] kuralı yok → gizli bölümler görünür');
 });
-await test('panel.js: arama TR/EN katlama ile yapılıyor (İkinci ↔ ikinci)', () => {
+await test('panel.js: arama katlaması store.katla üzerinden (tek kaynak)', () => {
   const kod = oku('panel.js');
-  assert.match(kod, /function katla/, 'katla() yok');
-  assert.match(kod, /normalize\('NFD'\)/, 'aksan temizliği yok');
-  const kullanim = (kod.match(/katla\(/g) || []).length;
-  assert.ok(kullanim >= 3, 'sorgu ve metin aynı fonksiyondan geçmiyor (kullanım: ' + kullanim + ')');
+  const depo = oku('assets/store.js');
+  assert.match(kod, /S\.filtrele\(/, 'panel store.filtrele kullanmıyor');
+  assert.match(depo, /function katla/, 'store.js içinde katla yok');
+  assert.ok(!/function katla/.test(kod), 'panel.js içinde katla kopyası var');
+});
+
+/* ================= 5) Renk · banner · site geneli · konum ================= */
+console.log('\n5) Renk / banner / konum kuralları');
+
+await test('palet: her rengin 5 alanı dolu (bg, kenar, metin, ikon, ikonBg)', () => {
+  S.RENKLER.forEach((r) => {
+    const p = S.PALET[r];
+    assert.ok(p, `palet yok: ${r}`);
+    ['bg', 'kenar', 'metin', 'ikon', 'ikonBg'].forEach((a) => assert.match(String(p[a]), /^#[0-9a-f]{6}$/i, `${r}.${a}`));
+  });
+  assert.equal(S.RENKLER.length, 6, '6 renk olmalı');
+});
+await test('renk: geçersiz/eksik değer varsayılana düşer (şema bozulmaz)', () => {
+  assert.equal(S.temizRenk(undefined), 'sari');
+  assert.equal(S.temizRenk('neon'), 'sari');
+  assert.equal(S.temizRenk('mavi'), 'mavi');
+  const s = S.dogrula({ notlar: [{ anahtar: 'a.com/', metin: 'x' }] });
+  assert.equal(s.notlar[0].renk, 'sari');
+  assert.equal(s.notlar[0].banner, false);
+  assert.equal(s.notlar[0].siteGeneli, false);
+  assert.equal(s.notlar[0].konum, null);
+});
+await test('banner kapalıysa siteGeneli YOK SAYILIR', () => {
+  const s = S.dogrula({ notlar: [{ anahtar: 'a.com/', metin: 'x', banner: false, siteGeneli: true }] });
+  assert.equal(s.notlar[0].banner, false);
+  assert.equal(s.notlar[0].siteGeneli, false, 'banner kapalıyken siteGeneli true kalmamalı');
+  const s2 = S.dogrula({ notlar: [{ anahtar: 'a.com/', metin: 'x', banner: true, siteGeneli: true }] });
+  assert.equal(s2.notlar[0].siteGeneli, true);
+});
+await test('konum: 0..1 aralığına kırpılır, bozuk değer null olur', () => {
+  assert.deepEqual(S.temizKonum({ x: 0.5, y: 2 }), { x: 0.5, y: 1 });
+  assert.deepEqual(S.temizKonum({ x: -1, y: 0.25 }), { x: 0, y: 0.25 });
+  assert.equal(S.temizKonum({ x: 'abc', y: 0.5 }), null);
+  assert.equal(S.temizKonum(null), null);
+});
+await test('ekle: renk/banner/siteGeneli birlikte kaydedilir', async () => {
+  await S.ekle('https://renkli.com/a', 'mavi not', { renk: 'mavi', banner: true, siteGeneli: true });
+  const n = await S.notuAl('renkli.com/a');
+  assert.equal(n.renk, 'mavi');
+  assert.equal(n.banner, true);
+  assert.equal(n.siteGeneli, true);
+  await S.ekle('https://renkli.com/a', 'pembe not', { renk: 'pembe', banner: true, siteGeneli: false });
+  const n2 = await S.notuAl('renkli.com/a');
+  assert.equal(n2.renk, 'pembe');
+  assert.equal(n2.siteGeneli, false);
+});
+await test('guncelle: banner kapatılınca siteGeneli de kapanır', async () => {
+  await S.guncelle('renkli.com/a', { banner: true, siteGeneli: true });
+  assert.equal((await S.notuAl('renkli.com/a')).siteGeneli, true);
+  await S.guncelle('renkli.com/a', { banner: false });
+  const n = await S.notuAl('renkli.com/a');
+  assert.equal(n.banner, false);
+  assert.equal(n.siteGeneli, false);
+});
+await test('kisaltOrtadan: kısa metin aynen, uzun metin ortadan kısaltılır', () => {
+  assert.equal(S.kisaltOrtadan('kisa', 20), 'kisa');
+  const uzun = 'https://cok-uzun-bir-site-adi.com/ve/uzun/bir/yol/urun-adi-12345';
+  const kisa = S.kisaltOrtadan(uzun, 30);
+  assert.equal(kisa.length, 30);
+  assert.ok(kisa.indexOf('…') !== -1, 'ortada … olmalı');
+  assert.ok(kisa.startsWith('https://'), 'baş kısmı korunmalı');
+  assert.ok(kisa.endsWith('12345'), 'son kısmı korunmalı');
+});
+
+/* ================= 6) Sayfada ne gösterilecek (sayfaNotu) ================= */
+console.log('\n6) Sayfa görünümü seçimi');
+
+function depo(notlar) { return S.dogrula({ version: 1, notlar: notlar }); }
+
+await test('sayfaNotu: normal not post-it olur, banner olmaz', () => {
+  const d = depo([{ anahtar: 'a.com/x', metin: 'normal' }]);
+  const r = S.sayfaNotu(d, 'https://a.com/x');
+  assert.equal(r.postit.metin, 'normal');
+  assert.equal(r.banner, null);
+});
+await test('sayfaNotu: banner notu post-it yerine geçer', () => {
+  const d = depo([{ anahtar: 'a.com/x', metin: 'duyuru', banner: true }]);
+  const r = S.sayfaNotu(d, 'https://a.com/x');
+  assert.equal(r.postit, null, 'banner açıkken post-it gösterilmez');
+  assert.equal(r.banner.metin, 'duyuru');
+});
+await test('sayfaNotu: site geneli banner AYNI SİTENİN başka sayfasında da görünür', () => {
+  const d = depo([{ anahtar: 'a.com/x', metin: 'site duyurusu', banner: true, siteGeneli: true }]);
+  const r = S.sayfaNotu(d, 'https://a.com/tamamen/baska/sayfa');
+  assert.ok(r.banner, 'site geneli banner başka sayfada görünmeli');
+  assert.equal(r.banner.metin, 'site duyurusu');
+});
+await test('sayfaNotu: site geneli YALNIZ aynı sitede; farklı sitede görünmez', () => {
+  const d = depo([{ anahtar: 'a.com/x', metin: 'a duyurusu', banner: true, siteGeneli: true }]);
+  assert.equal(S.sayfaNotu(d, 'https://baska.com/y').banner, null);
+  assert.equal(S.sayfaNotu(d, 'https://a.com/y').banner.metin, 'a duyurusu');
+  // www ayrı site sayılır (normalizeUrl kuralı)
+  assert.equal(S.sayfaNotu(d, 'https://www.a.com/y').banner, null);
+});
+await test('sayfaNotu: gizlenen (snooze) banner gösterilmez', () => {
+  const d = depo([{ anahtar: 'a.com/x', metin: 'duyuru', banner: true, gizleUntil: Date.now() + 60000 }]);
+  assert.equal(S.sayfaNotu(d, 'https://a.com/x').banner, null);
+});
+await test('sayfaNotu: tam sayfa bannerı site genelinden önce gelir', () => {
+  const d = depo([
+    { anahtar: 'a.com/x', metin: 'bu sayfanın', banner: true, guncelleme: 1 },
+    { anahtar: 'a.com/y', metin: 'site geneli', banner: true, siteGeneli: true, guncelleme: 9 },
+  ]);
+  assert.equal(S.sayfaNotu(d, 'https://a.com/x').banner.metin, 'bu sayfanın');
+  assert.equal(S.sayfaNotu(d, 'https://a.com/z').banner.metin, 'site geneli');
+});
+
+/* ================= 7) Panel süzgeci (renk + arama + site) ================= */
+console.log('\n7) Panel süzgeci');
+
+const ornekler = [
+  { anahtar: 'a.com/urun', host: 'a.com', metin: 'İkinci not', renk: 'mavi' },
+  { anahtar: 'a.com/diger', host: 'a.com', metin: 'başka', renk: 'sari' },
+  { anahtar: 'b.com/', host: 'b.com', metin: 'üçüncü', renk: 'mavi' },
+];
+await test('filtrele: renk filtresi', () => {
+  assert.equal(S.filtrele(ornekler, { renk: 'mavi' }).length, 2);
+  assert.equal(S.filtrele(ornekler, { renk: 'sari' }).length, 1);
+  assert.equal(S.filtrele(ornekler, { renk: 'tumu' }).length, 3);
+});
+await test('filtrele: arama TR İ tuzağı olmadan çalışır', () => {
+  assert.equal(S.filtrele(ornekler, { q: 'İkinci' }).length, 1);
+  assert.equal(S.filtrele(ornekler, { q: 'ikinci' }).length, 1);
+  assert.equal(S.filtrele(ornekler, { q: 'IKINCI' }).length, 1);
+  assert.equal(S.filtrele(ornekler, { q: 'yok' }).length, 0);
+});
+await test('filtrele: renk + arama + site birlikte', () => {
+  assert.equal(S.filtrele(ornekler, { renk: 'mavi', host: 'a.com' }).length, 1);
+  assert.equal(S.filtrele(ornekler, { renk: 'mavi', host: 'b.com', q: 'üç' }).length, 1);
+});
+await test('i18n: 6 rengin adı iki dilde de tanımlı', () => {
+  S.RENKLER.forEach((r) => {
+    assert.ok(I.DICT.tr['renk.' + r], `tr renk.${r} yok`);
+    assert.ok(I.DICT.en['renk.' + r], `en renk.${r} yok`);
+  });
+});
+
+/* ================= 8) İçerik betiği: banner + sürükleme kilidi ================= */
+console.log('\n8) İçerik betiği kilidi');
+
+await test('content.js: banner çizimi + SAYFA_NOTU mesajı', () => {
+  const kod = oku('content.js');
+  assert.match(kod, /cizBanner/);
+  assert.match(kod, /BANNER_ID = 'dtnot-banner'/);
+  assert.match(kod, /mesaj\('SAYFA_NOTU'/, 'SAYFA_NOTU kullanılmıyor');
+  assert.match(kod, /siteGeneli/, 'site geneli etiketi yok');
+});
+await test('content.js: sürükle-bırak konum kaydediyor (oran olarak)', () => {
+  const kod = oku('content.js');
+  assert.match(kod, /pointerdown/);
+  assert.match(kod, /pointermove/);
+  assert.match(kod, /konum: oran/, 'konum kaydedilmiyor');
+  assert.match(kod, /innerWidth - r\.width/, 'konum oranı yanlış hesaplanıyor');
+});
+await test('panel.js: renk filtresi store.filtrele üzerinden (tek kaynak)', () => {
+  const kod = oku('panel.js');
+  assert.match(kod, /S\.filtrele\(/);
+  assert.ok(!/function katla/.test(kod), 'katla kopyası kalmış (store tek kaynak olmalı)');
+});
+await test('popup.js: 6 renk seçici + banner/siteGeneli akışı bağlı', () => {
+  const kod = oku('popup.js');
+  assert.match(kod, /renkSeciciCiz/);
+  assert.match(kod, /S\.RENKLER/);
+  assert.match(kod, /siteGeneliChk'\)\.disabled = !form\.banner/);
+  assert.match(kod, /renk: form\.renk/);
+});
+await test('options.js: sürüm etiketi ayrı anahtardan (bozuk görünüm düzeltildi)', () => {
+  const kod = oku('options.js');
+  assert.match(kod, /T\('ayar\.surumEtiket'\)/);
+  assert.ok(!/T\('ayar\.surum', ''\)/.test(kod), 'eski bozuk kullanım kalmış');
 });
 
 console.log(`\nSONUÇ: ${gecen} geçti, ${kalan} kaldı`);
