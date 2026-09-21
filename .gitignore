@@ -1,0 +1,7 @@
+# DTNoT — geliştirme çöpü
+node_modules/
+dist/
+*.log
+gelen-kaynak/node_modules/
+gelen-kaynak/dist/
+gelen-kaynak/tsconfig.tsbuildinfo
