@@ -25,7 +25,7 @@ post-it çizmek için popup'taki **"İzin ver"** düğmesiyle site erişimi veri
 Derleme adımı yok — dosyayı düzenle, eklentiyi yenile:
 
 ```bash
-node tests/dtnot-test.mjs   # 37 test: depo mantığı · i18n bütünlüğü · mesajlaşma deseni · manifest kilidi
+node tests/dtnot-test.mjs   # 59 test: depo mantığı · i18n · mesajlaşma deseni · manifest · renk/banner/sürükleme
 python3 build.py            # paketle: Firefox .zip/.xpi + Chrome -chrome.zip + chrome-unpacked/
 python3 ikon-uret.py        # ikon setini yeniden üret (16/32/48/96/128)
 ```
@@ -67,6 +67,27 @@ Dosya düzeni:
 - Hiçbir ağ isteği yok; notlar `chrome.storage.local`'da kalır, hiçbir yere gönderilmez.
 - Manifest veri beyanı: `data_collection_permissions.required = ["none"]` (doğru beyan).
 - İçerik betiği yalnız DOM'a post-it çizer; sayfa içeriğini hiçbir yere iletmez.
+
+## 0.2.0 — yeni özellikler
+
+- **6 renkli post-it:** not eklerken/düzenlerken renk seçimi (sarı · yeşil · mavi · pembe · mor · turuncu).
+  Not tipine tek alan (`renk`) eklendi → eski kayıtlar varsayılana düşer, **şema bozulmaz**.
+  Palet tek kaynakta (`assets/store.js → PALET`); post-it, banner, seçici ve listedeki nokta aynı yerden beslenir.
+- **Renk filtresi:** panelde "Tümü + 6 renk" düğmeleri; arama + renk + site filtreleri birlikte çalışır.
+- **Banner modu:** düzenleme ekranında "Banner olarak göster" kutusu → not, sayfanın en tepesinde duyuru şeridi
+  olarak görünür (post-it yerine geçer). Bu kutu açılınca **"Site geneli"** kutusu etkinleşir: seçilirse not
+  o sitenin **tüm sayfalarında** görünür (tam sayfa bannerı site genelinden önce gelir).
+- **Sürükle-bırak:** post-it'i başlığından tutup sayfada istenen yere taşıyabilirsin; konum **pencere oranı**
+  olarak saklanır, pencere boyutu değişse de yer korunur.
+- **Anında görünüm:** not kaydedildiği anda içerik betiği yoksa sayfaya enjekte edilir ve post-it/banner
+  **sayfa yenilenmeden** görünür.
+- **Uzun link kısaltma:** popup ve panelde adresler ortadan kısaltılır (`…`), tam hâli `title`'da.
+- **Popup genişletildi** (336 → 404 px), başlıktaki ≡/⚙ düğmeleri büyütüldü (28 → 38 px).
+- **Tailwind-esinli yardımcı katman:** `assets/ui.css` içinde Tailwind isim/ölçeğiyle yardımcı sınıflar
+  (`flex`, `gap-2`, `p-3`, `text-sm`, `rounded-xl`, `truncate`, `text-muted`…). Derleme adımı olmadığı için
+  Tailwind'in kendisi kullanılmıyor; bileşenler bu katmanla kuruluyor.
+- **Ayarlar sürüm satırı düzeltildi** (`Sürüm: {0}` görünüyordu).
+- **Arama iyileştirmesi:** `İkinci` / `ikinci` / `IKINCI` artık eşleşir (Türkçe İ/I + aksan duyarsız katlama).
 
 ## 0.1.0 — gelen taslaktan farklar
 

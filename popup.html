@@ -27,9 +27,13 @@
 
     <section class="kart">
       <div class="satir aralik">
-        <div>
-          <div class="etiket" id="sayfaEtiket">Bu sayfa</div>
-          <div id="sayfaAdres" class="ipucu">…</div>
+        <div class="flex-1" style="min-width:0">
+          <div class="flex items-center gap-2" style="flex-wrap:wrap">
+            <span id="notRenk" class="renk-nokta" hidden></span>
+            <span class="etiket" id="sayfaEtiket">Bu sayfa</span>
+            <span id="bannerRozet" class="rozet rozet-banner" hidden>BANNER</span>
+          </div>
+          <div id="sayfaAdres" class="ipucu truncate" title="">…</div>
         </div>
         <span id="canliRozet" class="rozet" hidden>✓</span>
       </div>
@@ -41,6 +45,14 @@
 
       <div id="ekleKutu" class="dikey" style="margin-top:10px" hidden>
         <textarea id="metin" class="alan" maxlength="4000"></textarea>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="etiket" id="renkEtiket"></span>
+          <div id="renkler" class="renkler" role="group"></div>
+        </div>
+        <label class="onay"><input type="checkbox" id="bannerChk" /> <span id="bannerEtiket"></span></label>
+        <p class="ipucu" id="bannerNotu"></p>
+        <label class="onay"><input type="checkbox" id="siteGeneliChk" disabled /> <span id="siteGeneliEtiket"></span></label>
+        <p class="ipucu" id="siteGeneliNotu"></p>
         <div class="satir">
           <button type="button" id="kaydet" class="dugme">Kaydet</button>
           <button type="button" id="vazgec" class="dugme dugme--ikincil">Vazgeç</button>

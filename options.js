@@ -43,7 +43,7 @@
     $('hakkindaMetin').textContent = T('ayar.hakkindaMetin');
     $('gelistiriciEtiket').textContent = T('ayar.gelistirici').split(':')[0];
     try { $('surum').textContent = chrome.runtime.getManifest().version; } catch (e) { $('surum').textContent = '—'; }
-    $('surumEtiket').textContent = T('ayar.surum', '').replace(/:\s*$/, '');
+    $('surumEtiket').textContent = T('ayar.surumEtiket');
     I.bayraklar($('diller'));
     // seçenekler (dil değişince metinleri tazelenir)
     const strateji = $('strateji');
