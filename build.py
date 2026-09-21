@@ -97,13 +97,18 @@ def dogrula(hedef, m):
     return icerik
 
 
-def paket_yaz(hedef, manifest):
+def paket_yaz(hedef, manifest, manifest_ozel=None):
+    """manifest_ozel verilirse arşivdeki manifest.json onunla değiştirilir (Chrome için temiz sürüm)."""
     if os.path.exists(hedef):
         os.remove(hedef)
     with zipfile.ZipFile(hedef, 'w', zipfile.ZIP_DEFLATED) as z:
         for yol in calisma_dosyalari():
-            z.write(yol, os.path.relpath(yol, KOK))
-    icerik = dogrula(hedef, manifest)
+            rel = os.path.relpath(yol, KOK)
+            if rel == 'manifest.json' and manifest_ozel is not None:
+                z.writestr('manifest.json', json.dumps(manifest_ozel, ensure_ascii=False, indent=2) + '\n')
+            else:
+                z.write(yol, rel)
+    icerik = dogrula(hedef, manifest_ozel or manifest)
     print(f'✓ {os.path.basename(hedef)} — {len(icerik)} dosya, manifest kökte, referanslar tam')
     return hedef
 
@@ -130,7 +135,13 @@ def main():
     adlar = []
     for uzanti in ('zip', 'xpi'):
         adlar.append(paket_yaz(os.path.join(DIST, f'dtnot-{surum}.{uzanti}'), m))
-    adlar.append(paket_yaz(os.path.join(DIST, f'dtnot-{surum}-chrome.zip'), chrome_manifesti(m)))
+    adlar.append(paket_yaz(os.path.join(DIST, f'dtnot-{surum}-chrome.zip'), m, chrome_manifesti(m)))
+
+    # Chrome paketinde gecko'ya özel anahtar KALMAMALI (paketleyicinin asıl işi bu)
+    with zipfile.ZipFile(adlar[-1]) as z:
+        ch_kontrol = json.loads(z.read('manifest.json'))
+        assert 'browser_specific_settings' not in ch_kontrol, 'Chrome paketinde browser_specific_settings kalmış!'
+        assert ch_kontrol['background'].get('service_worker'), 'Chrome paketinde service_worker yok!'
 
     klasor = os.path.join(DIST, 'chrome-unpacked')
     if os.path.exists(klasor):
