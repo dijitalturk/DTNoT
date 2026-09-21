@@ -28,6 +28,8 @@
       b.addEventListener('click', () => { form.renk = renk; renkSeciciCiz(); });
       kap.appendChild(b);
     });
+    const etiket = $('renkSecili');
+    if (etiket) etiket.textContent = T('not.renkSecili', { renk: T('renk.' + form.renk) });
   }
 
   /** Formu mevcut nota göre doldur (yeni notta varsayılanlar). */
@@ -171,6 +173,8 @@
 
   async function sekmeAc(yol) {
     try { await chrome.tabs.create({ url: chrome.runtime.getURL(yol) }); } catch (e) { /* yut */ }
+    // Sayfa yeni sekmede açıldı → popup kapansın (aksi hâlde arkada boş duruyor)
+    try { window.close(); } catch (e) { /* yut */ }
   }
 
   /* ---------- Sağ tık menüsünden gelen "ekle" isteği (tek seferlik) ---------- */

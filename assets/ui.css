@@ -30,7 +30,7 @@ body {
   font: 13.5px/1.5 Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-body.popup { width: 404px; }
+body.popup { width: 448px; }
 body.tam-sayfa { padding: 26px 20px 40px; }
 
 h1, h2, h3 { margin: 0; font-weight: 650; letter-spacing: -0.01em; }
@@ -49,9 +49,12 @@ a { color: var(--vurgu); }
 .ust .marka { font-weight: 700; font-size: 15px; margin-right: auto; }
 .ust .marka small { display: block; font-weight: 500; font-size: 11px; color: var(--soluk); }
 
+.diller { display: flex; align-items: center; gap: 6px; flex: none; white-space: nowrap; }
+
 .dil-dugme {
-  all: unset; cursor: pointer; font-size: 15px; line-height: 1;
-  padding: 3px 5px; border-radius: 8px; border: 1px solid transparent;
+  all: unset; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 32px; font-size: 17px; line-height: 1; white-space: nowrap;
+  border-radius: 9px; border: 1px solid transparent;
 }
 .dil-dugme:hover { background: #eef2fb; }
 .dil-dugme[aria-pressed="true"] { border-color: var(--vurgu); background: #eaf1ff; }
@@ -145,18 +148,38 @@ code, .kod { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-s
 /* ---------- Renk seçici / renk noktası ---------- */
 .renkler { display: flex; align-items: center; gap: 7px; }
 .renk-sec {
-  all: unset; cursor: pointer; width: 24px; height: 24px; border-radius: 999px;
+  all: unset; cursor: pointer; position: relative; width: 24px; height: 24px; border-radius: 999px;
   border: 2px solid transparent; box-shadow: inset 0 0 0 1px rgba(9, 20, 45, .14);
-  transition: transform .08s ease;
+  transition: transform .08s ease, box-shadow .08s ease;
 }
 .renk-sec:hover { transform: scale(1.08); }
-.renk-sec[aria-pressed="true"] { border-color: var(--vurgu); transform: scale(1.06); }
-.renk-sec:focus-visible { outline: 3px solid #93b4f8; outline-offset: 2px; }
+/* SEÇİLİ RENK: çift halka + içinde ✓ — uzaktan bakınca bile belli olsun */
+.renk-sec[aria-pressed="true"] {
+  transform: scale(1.16);
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--vurgu), inset 0 0 0 1px rgba(9, 20, 45, .18);
+}
+.renk-sec[aria-pressed="true"]::after {
+  content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: #14203c; text-shadow: 0 1px 0 rgba(255, 255, 255, .75);
+}
+.renk-sec:focus-visible { outline: 3px solid #93b4f8; outline-offset: 3px; }
+.renk-secili {
+  font-size: 11.5px; font-weight: 600; color: var(--metin); background: #eef2fb;
+  border: 1px solid var(--cizgi); border-radius: 999px; padding: 2px 9px;
+}
 .renk-nokta {
   display: inline-block; width: 10px; height: 10px; border-radius: 999px; flex: 0 0 auto;
   box-shadow: inset 0 0 0 1px rgba(9, 20, 45, .16);
 }
 .rozet-banner { background: #eef2ff; color: #3730a3; border-color: #dcdffb; }
+
+/* Popup alt bağlantısı (DijitalTurk.com) */
+.alt-link {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 10px; font-size: 12px; color: var(--soluk); text-decoration: none;
+}
+.alt-link:hover { color: var(--vurgu); text-decoration: underline; }
+.alt-link svg { width: 15px; height: 15px; flex: none; }
 
 /* ---------- Tailwind-esinli yardımcı katman ----------
    Derleme adımı olmadığı için Tailwind'in kendisi kullanılmıyor; isim/ölçek Tailwind'den

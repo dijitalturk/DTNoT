@@ -21,6 +21,35 @@
   let sonPostit = null;
   let sonBanner = null;
   let calisiyor = false;
+  let bannerYuksek = 0;
+  let bannerRO = null;
+
+  /* Banner sayfayı AŞAĞI İTTİRİR (sitenin header'ının üstüne binmez): sayfanın mevcut
+     üst boşluğu saklanır, banner yüksekliği eklenir; banner kalkınca eski hâle döner. */
+  function sayfaIttir(yukseklik) {
+    const el = document.documentElement;
+    if (!el) return;
+    if (el.dataset.dtnotTaban === undefined) el.dataset.dtnotTaban = el.style.paddingTop || '';
+    const taban = el.dataset.dtnotTaban || '';
+    const px = Math.max(0, Math.round(Number(yukseklik) || 0));
+    if (px > 0) {
+      el.style.paddingTop = taban ? 'calc(' + taban + ' + ' + px + 'px)' : px + 'px';
+      bannerYuksek = px;
+    } else {
+      el.style.paddingTop = taban;
+      bannerYuksek = 0;
+      delete el.dataset.dtnotTaban;
+    }
+  }
+
+  function bannerKaldir() {
+    if (bannerRO) {
+      try { bannerRO.disconnect(); } catch (e) { /* yut */ }
+      bannerRO = null;
+    }
+    kaldir(BANNER_ID);
+    sayfaIttir(0);
+  }
 
   async function ayarlariTazele() {
     try {
@@ -245,12 +274,26 @@
     const kapat = ikonDugme(t('icerik.gizleSure', { s: sureMetni() }), '\u00d7');
     kapat.addEventListener('click', async () => {
       await mesaj('NOT_GUNCELLE', { anahtar: not.anahtar, patch: { gizleUntil: Date.now() + gizleMs } });
-      kaldir(BANNER_ID);
+      bannerKaldir();
     });
 
     serit.appendChild(metin);
     serit.appendChild(kapat);
     golge.appendChild(serit);
+
+    // Yüksekliği ölç → sayfayı aşağı it (metin kaydırınca da güncelle)
+    const olcVeIttir = () => {
+      const h = Math.ceil(serit.getBoundingClientRect().height);
+      if (h > 0 && h !== bannerYuksek) sayfaIttir(h);
+    };
+    try { requestAnimationFrame(olcVeIttir); } catch (e) { olcVeIttir(); }
+    try {
+      if (globalThis.ResizeObserver) {
+        bannerRO = new ResizeObserver(olcVeIttir);
+        bannerRO.observe(serit);
+      }
+    } catch (e) { /* yut */ }
+    window.addEventListener('resize', olcVeIttir);
   }
 
   /* ---------------- Değerlendirme döngüsü ---------------- */
@@ -263,7 +306,7 @@
         sonPostit = null;
         sonBanner = null;
         kaldir(HOST_ID);
-        kaldir(BANNER_ID);
+        bannerKaldir();
         return;
       }
       const { postit, banner } = await sayfaNotunuSor();
@@ -291,7 +334,7 @@
           if (yeniB) yeniB.dataset.imza = imzaB;
         }
       } else {
-        kaldir(BANNER_ID);
+        bannerKaldir();
       }
     } finally {
       calisiyor = false;
