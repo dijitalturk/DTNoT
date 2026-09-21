@@ -444,5 +444,63 @@ await test('options.js: sürüm etiketi ayrı anahtardan (bozuk görünüm düze
   assert.ok(!/T\('ayar\.surum', ''\)/.test(kod), 'eski bozuk kullanım kalmış');
 });
 
+/* ================= 9) Arayüz ince ayarları (0.2.1) ================= */
+console.log('\n9) Arayüz ince ayarları');
+
+await test('ui.css: dil bayrakları YAN YANA (flex + nowrap)', () => {
+  const css = oku('assets/ui.css');
+  assert.match(css, /\.diller\s*\{[^}]*display:\s*flex/, '.diller flex değil');
+  assert.match(css, /\.diller\s*\{[^}]*flex:\s*none/, '.diller sıkışıp alt satıra kayabilir');
+  assert.match(css, /\.diller\s*\{[^}]*white-space:\s*nowrap/, 'nowrap yok');
+  assert.match(css, /\.dil-dugme\s*\{[^}]*display:\s*inline-flex/, 'bayrak düğmesi inline-flex değil');
+});
+await test('ui.css: seçili renk vurgusu net (çift halka + ✓)', () => {
+  const css = oku('assets/ui.css');
+  assert.match(css, /\.renk-sec\[aria-pressed="true"\]\s*\{[^}]*transform:\s*scale\(1\.1[0-9]?\)/, 'seçili renk büyümüyor');
+  assert.match(css, /\.renk-sec\[aria-pressed="true"\]\s*\{[^}]*0 0 0 4px var\(--vurgu\)/, 'vurgu halkası yok');
+  assert.match(css, /\.renk-sec\[aria-pressed="true"\]::after\s*\{[^}]*content:\s*'✓'/, '✓ işareti yok');
+});
+await test('popup: genişlik artırıldı (448px) + alt bağlantı var', () => {
+  const css = oku('assets/ui.css');
+  const html = oku('popup.html');
+  assert.match(css, /body\.popup\s*\{\s*width:\s*448px/);
+  assert.match(html, /id="dtLink"/, 'DijitalTurk.com bağlantısı yok');
+  assert.match(html, /DijitalTurk\.com/);
+  assert.match(html, /<svg/, 'bağlantı ikonu (svg) yok');
+  assert.match(html, /id="renkSecili"/, 'seçili renk etiketi yok');
+});
+await test('popup.js: panel/ayarlar açılınca popup kapanıyor', () => {
+  const kod = oku('popup.js');
+  assert.match(kod, /async function sekmeAc[\s\S]{0,400}window\.close\(\)/, 'window.close() yok');
+  assert.match(kod, /renkSecili.*not\.renkSecili|not\.renkSecili/, 'seçili renk etiketi güncellenmiyor');
+});
+await test('content.js: banner sayfayı aşağı ittiriyor (üstüne binmiyor)', () => {
+  const kod = oku('content.js');
+  assert.match(kod, /function sayfaIttir/, 'sayfaIttir yok');
+  assert.match(kod, /paddingTop/, 'sayfa padding-top ayarlanmıyor');
+  assert.match(kod, /dtnotTaban/, 'sayfanın eski boşluğu saklanmıyor');
+  assert.match(kod, /ResizeObserver/, 'banner yüksekliği izlenmiyor');
+  assert.match(kod, /function bannerKaldir[\s\S]{0,200}sayfaIttir\(0\)/, 'banner kalkınca sayfa eski hâline dönmüyor');
+});
+await test('i18n: kullanıcının verdiği yeni metinler iki dilde de var', () => {
+  const tr = I.DICT.tr;
+  const en = I.DICT.en;
+  assert.match(tr['ayar.hakkindaMetin'], /gizliliğine önem verir/);
+  assert.match(tr['ayar.hakkindaMetin'], /kişisel bilgisayarınızda kalır/);
+  assert.match(tr['ayar.gizlemeNot'], /Notu kapattığınızda belirlediğiniz süre boyunca notunuz görünmez olur/);
+  assert.match(tr['ayar.sadeceAktif'], /otomatik olarak filtreleyip gösterir/);
+  assert.match(en['ayar.hakkindaMetin'], /privacy/);
+  assert.match(en['ayar.gizlemeNot'], /stays hidden for the period/);
+  assert.match(en['ayar.sadeceAktif'], /automatically filters/);
+  assert.equal(tr['not.renkSecili'], 'Seçili renk: {renk}');
+  assert.equal(en['not.renkSecili'], 'Selected colour: {renk}');
+});
+await test('i18n: eski metinler kalmadı', () => {
+  const metin = oku('assets/i18n.js');
+  assert.ok(!metin.includes('hesap, sunucu veya anahtar gerekmez'), 'eski hakkında metni kalmış');
+  assert.ok(!metin.includes('Panel açılırken yalnız aktif siteyi göster'), 'eski sadeceAktif metni kalmış');
+  assert.ok(!metin.includes('Post-it’i gizle dediğinde'), 'eski gizlemeNot metni kalmış');
+});
+
 console.log(`\nSONUÇ: ${gecen} geçti, ${kalan} kaldı`);
 process.exit(kalan ? 1 : 0);

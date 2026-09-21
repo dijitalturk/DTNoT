@@ -68,6 +68,22 @@ Dosya düzeni:
 - Manifest veri beyanı: `data_collection_permissions.required = ["none"]` (doğru beyan).
 - İçerik betiği yalnız DOM'a post-it çizer; sayfa içeriğini hiçbir yere iletmez.
 
+## 0.2.1 — arayüz ince ayarları
+
+- **Seçili renk artık net belli:** çift halka + ortasında **✓** işareti + %16 büyüme; yanında
+  "Seçili renk: Mavi" etiketi (popup ve panelde aynı).
+- **Banner siteyi aşağı ittiriyor:** duyuru şeridi sitenin header'ının üstüne binmiyor; sayfa banner
+  yüksekliği kadar aşağı kaydırılıyor (yükseklik `ResizeObserver` ile izlenir), banner kapanınca sayfa
+  eski hâline dönüyor.
+- **Popup'ta TR/EN bayrakları yan yana** (eski durumda `#diller` sıkışıp bayraklar alt satıra kayıyordu).
+- **"Notlarım"/Ayarlar açılınca popup kapanıyor** (arkada boş durmuyor).
+- **Popup altına DijitalTurk.com bağlantısı** (küre ikonu ile) eklendi; popup genişliği **448 px**.
+- **Metinler güncellendi:** Hakkında → gizlilik vurgusu ("hiçbir veriniz dışarı sızdırılmaz, tüm
+  notlarınız kişisel bilgisayarınızda kalır"), "Gizle" süresi → "Notu kapattığınızda belirlediğiniz süre
+  boyunca notunuz görünmez olur", "Yalnız aktif site" → "Notlarım ekranındayken… otomatik olarak
+  filtreleyip gösterir".
+- **66 test** · Chrome ve Firefox'ta ölçüldü.
+
 ## 0.2.0 — yeni özellikler
 
 - **6 renkli post-it:** not eklerken/düzenlerken renk seçimi (sarı · yeşil · mavi · pembe · mor · turuncu).
