@@ -1,5 +1,6 @@
-/* DTNoT — popup: aktif sayfanın notu + hızlı ekleme + izin/panel/ayarlar.
-   Tüm metinler TR/EN; dil değişince yeniden çizilir. */
+/* DTNoT — popup: aktif sayfanın notu + hızlı ekleme + izin/panel + popup İÇİNDE
+   Ayarlar görünümü (gizleme süresi, Notlarım davranışı) ve tam sayfayı yeni
+   sekmede açan bağlantı. Tüm metinler TR/EN; dil değişince yeniden çizilir. */
 (function () {
   'use strict';
 
@@ -8,7 +9,7 @@
   const T = (k, v) => I.t(k, v);
   const $ = (id) => document.getElementById(id);
 
-  let durum = { url: '', anahtar: '', tabId: null, izin: null, kayitli: false, toplam: 0, not: null };
+  let durum = { url: '', anahtar: '', tabId: null, izin: null, kayitli: false, toplam: 0, not: null, ayarlar: {} };
   const form = { renk: 'sari', banner: false, siteGeneli: false };
 
   /** 6 renk seçici — palet tek kaynaktan gelir (DTNOT_STORE.PALET). */
@@ -83,6 +84,16 @@
     $('ayarAc').setAttribute('aria-label', T('ortak.ayarlar'));
     $('panelAc').title = T('panel.baslik');
     $('panelAc').setAttribute('aria-label', T('panel.baslik'));
+    /* Popup içindeki Ayarlar görünümü */
+    $('ayarBaslik').textContent = T('ortak.ayarlar');
+    $('ayarKapat').title = T('ortak.kapat');
+    $('ayarKapat').setAttribute('aria-label', T('ortak.kapat'));
+    $('gizlemeEtiket').textContent = T('ayar.gizlemeSuresi');
+    $('gizlemeNot').textContent = T('ayar.gizlemeNot');
+    $('sadeceAktifEtiket').textContent = T('ayar.sadeceAktif');
+    $('yeniSayfadaAcMetin').textContent = T('ayar.yeniSayfada');
+    $('yeniSayfadaAc').title = T('ayar.yeniSayfada');
+    gizlemeSecenekleriCiz();
     try { $('altBilgi').textContent = 'DTNoT v' + chrome.runtime.getManifest().version; } catch (e) { /* yut */ }
     I.bayraklar($('diller'));
   }
@@ -179,6 +190,54 @@
     try { window.close(); } catch (e) { /* yut */ }
   }
 
+  /* ---------- Ayarlar: popup'ın İÇİNDE açılır (popup kapanmaz) ---------- */
+  /** Gizleme süresi seçenekleri — tek kaynak S.GIZLEME_SAAT (tam sayfayla aynı liste). */
+  function gizlemeSecenekleriCiz() {
+    const g = $('gizleme');
+    if (!g) return;
+    const secili = g.value || String((durum.ayarlar || {}).gizlemeSaat || S.VARSAYILAN_AYAR.gizlemeSaat || 1);
+    g.textContent = '';
+    S.GIZLEME_SAAT.forEach((saat) => {
+      const o = document.createElement('option');
+      o.value = String(saat);
+      o.textContent = T('saat.' + saat);
+      g.appendChild(o);
+    });
+    g.value = secili;
+  }
+
+  /** Popup'ta gösterilen ayarlar: gizleme süresi + Notlarım davranışı.
+      Karmaşık veri yönetimi (yedekleme/geri yükleme) yalnız tam sayfada kalır. */
+  async function ayarlariYukle() {
+    const a = await S.ayarlariAl();
+    durum.ayarlar = a;
+    gizlemeSecenekleriCiz();
+    $('gizleme').value = String(a.gizlemeSaat);
+    $('sadeceAktif').checked = a.sadeceAktif === true;
+  }
+
+  /** Ayarlar görünümünü popup içinde aç/kapa (popup AÇIK kalır). */
+  async function ayarModu(ac) {
+    $('ayarKutu').hidden = !ac;
+    $('ayarAc').setAttribute('aria-pressed', String(!!ac));
+    if (ac) await ayarlariYukle();
+  }
+
+  /** Tam ayar sayfası YENİ SEKMEDE: önce openOptionsPage, olmazsa tabs.create. */
+  async function tamAyarlariAc() {
+    const B = (typeof browser !== 'undefined' && browser.runtime) ? browser : null;
+    try {
+      if (B && B.runtime.openOptionsPage) { await B.runtime.openOptionsPage(); return true; }
+      if (chrome.runtime.openOptionsPage) { await chrome.runtime.openOptionsPage(); return true; }
+    } catch (e) { /* yedek yola düş */ }
+    try {
+      const tabs = (B && B.tabs) ? B.tabs : chrome.tabs;
+      const rt = (B && B.runtime) ? B.runtime : chrome.runtime;
+      await tabs.create({ url: rt.getURL('options.html') });
+      return true;
+    } catch (e) { return false; }
+  }
+
   /* ---------- Sağ tık menüsünden gelen "ekle" isteği (tek seferlik) ---------- */
   async function bekleyeniTüket() {
     const anahtar = 'dtnot-pending';
@@ -218,7 +277,22 @@
     $('izinVer').addEventListener('click', izinAl);
     $('panelAc').addEventListener('click', () => sekmeAc('panel.html'));
     $('panelDugme').addEventListener('click', () => sekmeAc('panel.html'));
-    $('ayarAc').addEventListener('click', () => sekmeAc('options.html'));
+    // Ayarlar: popup İÇİNDE açılır — sekme açılmaz, popup kapanmaz.
+    $('ayarAc').addEventListener('click', () => ayarModu($('ayarKutu').hidden));
+    $('ayarKapat').addEventListener('click', () => ayarModu(false));
+    // Ayarların altındaki bağlantı: tam sayfa YENİ SEKMEDE (openOptionsPage + yedek)
+    $('yeniSayfadaAc').addEventListener('click', (e) => { e.preventDefault(); tamAyarlariAc(); });
+    $('gizleme').addEventListener('change', async (e) => {
+      const yeni = Number(e.target.value);
+      durum.ayarlar = Object.assign({}, durum.ayarlar, { gizlemeSaat: yeni });
+      await S.ayarlariKaydet({ gizlemeSaat: yeni });
+      bildir(T('popup.kaydedildi'), 'tamam');
+    });
+    $('sadeceAktif').addEventListener('change', async (e) => {
+      durum.ayarlar = Object.assign({}, durum.ayarlar, { sadeceAktif: e.target.checked });
+      await S.ayarlariKaydet({ sadeceAktif: e.target.checked });
+      bildir(T('popup.kaydedildi'), 'tamam');
+    });
     $('metin').addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) kaydet();
     });

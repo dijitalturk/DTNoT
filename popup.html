@@ -17,11 +17,36 @@
       <div class="topbar__sag">
         <div id="diller" class="diller" role="group" aria-label="Dil"></div>
         <button type="button" id="panelAc" class="ikon-dugme ikon-dugme--soluk" title="Notlarım" aria-label="Notlarım">≡</button>
-        <button type="button" id="ayarAc" class="ikon-dugme ikon-dugme--soluk" title="Ayarlar" aria-label="Ayarlar">⚙</button>
+        <button type="button" id="ayarAc" class="ikon-dugme ikon-dugme--soluk" title="Ayarlar" aria-label="Ayarlar" aria-pressed="false">⚙</button>
       </div>
     </header>
 
     <div id="bildirim" class="durum" role="status" aria-live="polite"></div>
+
+    <section id="ayarKutu" class="panel yigin" hidden>
+      <div class="toolbar">
+        <h2 id="ayarBaslik" class="bolum-baslik"></h2>
+        <div class="toolbar__sag">
+          <button type="button" id="ayarKapat" class="ikon-dugme ikon-dugme--soluk" title="Kapat" aria-label="Kapat">✕</button>
+        </div>
+      </div>
+      <div class="ayar-satir">
+        <label class="secici__etiket" for="gizleme" id="gizlemeEtiket"></label>
+        <select id="gizleme" class="secici"></select>
+        <p class="ipucu" id="gizlemeNot"></p>
+      </div>
+      <label class="onay"><input type="checkbox" id="sadeceAktif" /> <span id="sadeceAktifEtiket"></span></label>
+      <div class="altbilgi">
+        <a id="yeniSayfadaAc" class="altbilgi__link" href="options.html" target="_blank" rel="noreferrer noopener">
+          <span id="yeniSayfadaAcMetin"></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 3h7v7"></path>
+            <path d="M21 3l-9 9"></path>
+            <path d="M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"></path>
+          </svg>
+        </a>
+      </div>
+    </section>
 
     <section id="izinKutu" class="panel panel--uyari yigin" hidden>
       <b id="izinBaslik"></b>

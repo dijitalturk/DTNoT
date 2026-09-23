@@ -6,5 +6,9 @@
   "appDesc": {
     "message": "Leave notes on the pages you browse; when you return to a page your note shows up bottom-left as a sticky note.",
     "description": "Extension description (store listing)"
+  },
+  "ayarYeniSayfada": {
+    "message": "Open in new tab",
+    "description": "Link below the popup Settings area: opens the full settings page in a new tab"
   }
 }

@@ -6,5 +6,9 @@
   "appDesc": {
     "message": "Gezindiğin web sayfalarına not bırak; aynı sayfaya döndüğünde notun sol altta post-it olarak karşına çıksın.",
     "description": "Eklenti açıklaması (mağaza listelemesi)"
+  },
+  "ayarYeniSayfada": {
+    "message": "Yeni sayfada aç",
+    "description": "Popup Ayarlar alanının altındaki bağlantı: tam ayar sayfasını yeni sekmede açar"
   }
 }
