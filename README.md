@@ -25,7 +25,7 @@ post-it çizmek için popup'taki **"İzin ver"** düğmesiyle site erişimi veri
 Derleme adımı yok — dosyayı düzenle, eklentiyi yenile:
 
 ```bash
-node tests/dtnot-test.mjs   # 59 test: depo mantığı · i18n · mesajlaşma deseni · manifest · renk/banner/sürükleme
+node tests/dtnot-test.mjs   # 80 test: depo mantığı · i18n · mesajlaşma deseni · manifest · renk/banner/sürükleme · tema
 python3 build.py            # paketle: Firefox .zip/.xpi + Chrome -chrome.zip + chrome-unpacked/
 python3 ikon-uret.py        # ikon setini yeniden üret (16/32/48/96/128)
 ```
@@ -36,12 +36,13 @@ Dosya düzeni:
 |---|---|
 | `assets/store.js` | **Tek kaynak**: normalizeUrl, doğrulama, not/ayar CRUD, JSON yedekleme |
 | `assets/i18n.js` | TR/EN sözlüğü + dil değişimi + bayrak düğmeleri |
-| `assets/ui.css` | Tek tasarım sistemi (popup · panel · ayarlar) |
+| `assets/ui.css` | Tek tasarım sistemi (popup · panel · ayarlar) + koyu/açık tema |
+| `assets/tema.js` | Tema: `db-acik` sınıfını uygular, popup ve Ayarlar aynı seçiciyi buradan kurar |
 | `background.js` | İçerik betiği kaydı (izne bağlı), sağ tık menüsü, **tüm depo işlemleri** |
 | `content.js` | Sayfa içi post-it (Shadow DOM); notu **mesajla** arka plandan ister |
-| `popup.*` | Aktif sayfanın notu + hızlı ekleme + izin/panel/ayarlar |
+| `popup.*` | Aktif sayfanın notu + hızlı ekleme + izin/panel + **popup içi Ayarlar** |
 | `panel.*` | Notlarım: site grupları, arama, satır içi düzenle/sil/sayfayı aç |
-| `options.*` | Dil, gizleme süresi, panel davranışı, **JSON dışa/içe aktarma** |
+| `options.*` | Gizleme süresi, tema, panel davranışı, **JSON dışa/içe aktarma** |
 | `_locales/tr|en` | Mağaza adı/açıklaması (`__MSG_…__`), `default_locale` |
 | `tests/dtnot-test.mjs` | Testler (npm bağımlılığı yok) |
 | `build.py` · `ikon-uret.py` | Paketleme · ikon üretimi |
@@ -76,13 +77,31 @@ Dosya düzeni:
   yüksekliği kadar aşağı kaydırılıyor (yükseklik `ResizeObserver` ile izlenir), banner kapanınca sayfa
   eski hâline dönüyor.
 - **Popup'ta TR/EN bayrakları yan yana** (eski durumda `#diller` sıkışıp bayraklar alt satıra kayıyordu).
-- **"Notlarım"/Ayarlar açılınca popup kapanıyor** (arkada boş durmuyor).
+- **"Notlarım" açılınca popup kapanıyor** (arkada boş durmuyor); **Ayarlar ise popup'ın içinde** açılır.
 - **Popup altına DijitalTurk.com bağlantısı** (küre ikonu ile) eklendi; popup genişliği **448 px**.
 - **Metinler güncellendi:** Hakkında → gizlilik vurgusu ("hiçbir veriniz dışarı sızdırılmaz, tüm
   notlarınız kişisel bilgisayarınızda kalır"), "Gizle" süresi → "Notu kapattığınızda belirlediğiniz süre
   boyunca notunuz görünmez olur", "Yalnız aktif site" → "Notlarım ekranındayken… otomatik olarak
   filtreleyip gösterir".
-- **66 test** · Chrome ve Firefox'ta ölçüldü.
+- **80 test** · Chrome ve Firefox'ta ölçüldü.
+
+## Ayarlar / tema güncellemeleri (paket sürümü değişmedi: 0.2.1)
+
+- **Ayarlar artık popup İÇİNDE açılıyor** (sekme açılmıyor, popup kapanmıyor): popup'ta gizleme süresi,
+  "Yalnız aktif site" davranışı ve tema seçici; altında **"Yeni sayfada aç ↗"** bağlantısı tam ayar
+  sayfasını **yeni sekmede** açar (`runtime.openOptionsPage()`; desteklenmezse
+  `tabs.create({ url: runtime.getURL('options.html') })`). Karmaşık veri yönetimi (JSON yedekleme/geri
+  yükleme) bilinçli olarak tam sayfada kaldı — dosya seçici popup kapanınca iptal olabilir.
+- **Popup üst bar ikonları** (Notlarım ≡ · Ayarlar ⚙) bayrak düğmeleriyle **aynı ölçüde** (34×30 +
+  `flex: none`); Ayarlar popup içinde açıkken ⚙ "etkin" görünür.
+- **Ayarlar'daki dil seçimi kaldırıldı**: "Dil" katlanır bölümü, başlıktaki `TR/EN` özeti ve üst bardaki
+  bayraklar çıktı. Dil, popup/panel üst barındaki bayraklarla değişir; `assets/i18n.js` ve `_locales`
+  altyapısı aynen durur.
+- **Ayarlar'da "Hakkında" bölümü varsayılan AÇIK** (Davranış açık, Veri kapalı kalır).
+- **Tema (Koyu / Açık) seçimi:** `ayar.tema` (`koyu` varsayılan; bozuk değer koyuya düşer) ve kök elemanda
+  `db-acik` sınıfı. Popup ve Ayarlar **aynı** seçiciyi `assets/tema.js` üzerinden kurar; seçim anında
+  uygulanır. Açık temada başlık/bağlantı/rozet metinleri için okunurluk karşılıkları `ui.css`'e eklendi.
+  **Kapsam yalnız DTNoT yüzeyleri**: sayfaya çizilen post-it/banner gölge DOM'u tema dışıdır (palet VERİ).
 
 ## 0.2.0 — yeni özellikler
 

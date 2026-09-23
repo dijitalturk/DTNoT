@@ -53,7 +53,7 @@ renksiz `border` koyu temada doğru görünür.
 | `.topbar` `.topbar__metin` `.topbar__baslik` `.topbar__alt` `.topbar__sag` `.marka-kutu` | üst bar |
 | `.pill` `.pill--ok` `.pill--warn` `.pill--danger` `.pill--soluk` | rozet/badge (BANNER, ✓, sayaç, sürüm) |
 | `.btn` `.btn--primary` `.btn--danger` `.btn--pill` `.btn--kucuk` `.btn--secili` `.btn--gri` | düğmeler |
-| `.ikon-dugme` (+`--soluk`, `--ok`, `--danger`, `--oynat`, `--duzenle`) | ikon düğmesi (30px) |
+| `.ikon-dugme` (+`--soluk`, `--ok`, `--danger`, `--oynat`, `--duzenle`) | ikon düğmesi (30px; **üst barda** bayrakla eşit 34×30 + `flex:none`) |
 | `.mesaj`, `.mesaj--hata` | bildirim/durum şeridi (JS `bildir()` bunu yazar) |
 | `.girdi` (`input`, `textarea`) | metin girişi |
 | `.secici__etiket` + `select.secici` + `.secici__alt` | kayıt seçici (combobox) |
@@ -66,7 +66,7 @@ renksiz `border` koyu temada doğru görünür.
 | `.onay` (+ `input[type=checkbox]`) | onay kutusu satırı |
 | `.yigin` | dikey yığın (gap 12px) |
 | `.etiket` `.ipucu` `.bolum-baslik` `.durum` | küçük tipografi |
-| `.diller` `.dil-dugme` | TR/EN bayrak düğmeleri (test-kilitli adlar) |
+| `.diller` `.dil-dugme` | TR/EN bayrak düğmeleri (test-kilitli adlar; yalnız **popup** ve **panel** üst barında) |
 | `.renkler` `.renk-sec` `.renk-nokta` `.renk-secili` | post-it renk seçici (bölüm 6) |
 | `.grup` `.grup-bas` `.not-satir` `.not-yol` `.not-metin` `.not-alt` `.not-tarih` | Notlarım liste satırları |
 | `.kv-liste` `.kv` | anahtar/değer satırı (Ayarlar → Hakkında) |
@@ -106,13 +106,13 @@ bilgiyi gizlememek.
 Kurallar:
 
 - Açık/kapalı durumu **bölüm başına** `data-acik="true|false"` ile verilir
-  (Ayarlar: Dil ve Davranış açık; Veri ve Hakkında kapalı).
+  (Ayarlar: Davranış **ve** Hakkında açık; Veri kapalı).
 - Gövde **DOM'dan silinmez**; yalnız `hidden` + `data-acik` değişir
   (`ui.css`: `[hidden] { display: none !important }` ve
   `.katlanir[data-acik='false'] .katlanir__govde`). Böylece arama/otomasyon
   erişimi bozulmaz.
 - Kapalıyken başlıkta **tek satırlık özet** gösterilir, bilgi kaybolmaz:
-  Dil → `TR/EN` · Davranış → gizleme süresi ("1 saat") · Veri → "N not" ·
+  Davranış → gizleme süresi ("1 saat") · Veri → "N not" ·
   Hakkında → "Sürüm: 0.2.1".
 - Davranışı `options.js` → `katlanirlariKur()` kurar: `.katlanir` bölümlerini
   tarar, `data-acik` / `aria-expanded` / `hidden` / ok (▾ ▸) değerlerini
@@ -129,15 +129,24 @@ Tema, `<html>` köküne **`db-acik`** sınıfı eklenerek uygulanır; renkler
 (bg/surface/border/text/muted/dim + `color-scheme: light`). Kural: bu bloğun
 dışında tema için renk yazılmaz; bileşenler tema farkını bilmez.
 
+- Kullanıcı seçimi **Ayarlar → Davranış → Tema** (`select.secici`) ile yapılır;
+  ayar modeli `assets/store.js → temizTema` ve **varsayılan `koyu`** (bozuk/
+  bilinmeyen değer koyuya düşer).
+- Uygulama **tek yerde**: `assets/tema.js` → `hazirla()` (açılışta) ve
+  `seciciKur(el)` (seçim anında). Popup ve Ayarlar aynı seçiciyi buradan kurar —
+  ekranlarda kopya tema kodu **yok**; dil değişince seçenek metinleri tazelenir.
+- `panel.html` yalnız `hazirla()` çağırır (tema seçicisi orada yok).
+- **Kapsam:** tema yalnız DTNoT'un kendi yüzeylerini (popup · Notlarım ·
+  Ayarlar) etkiler. Host sayfaya çizilen post-it/banner gölge DOM'u tema
+  **DIŞIDIR** — post-it paleti VERİDİR (bölüm 6) ve sayfa tarafında değişmez.
+
 `html.db-acik` altında zemin/çeper düzeltmesi gereken bileşenler (bos-durum,
 stat, girdi, secici, katlanir başlık hover, ikon-dugme/btn/dil-dugme hover,
 renk-sec seçili halkası, not-satir hover) aynı bloğun **DTNoT eki** başlığı
-altında toplanmıştır — yeni bileşen eklerken düzeltmesi oraya yazılır.
-
-Durum: blok hazır ve gelecekteki tema seçimi için test edilebilir; DTNoT'ta
-şu an tema değiştirme düğmesi yok, dolayısıyla `db-acik` sınıfı hiçbir yerde
-eklenmiyor (varsayılan koyu). Eklenirse tek yapılacak `document.documentElement`
-üzerine sınıfı koymaktır.
+altında toplanmıştır — yeni bileşen eklerken düzeltmesi oraya yazılır. Aynı
+ekin sonunda koyu zemin için seçilmiş sabit tonlu metinlerin (başlık, `.mesaj`,
+`.pill--*`, bağlantı) **açık tema karşılıkları** durur; yoksa beyaz zeminde
+okunmaz kalırlar.
 
 ## 6. Post-it paleti **VERİDİR** (renk kararı CSS'te kalır)
 
@@ -172,14 +181,19 @@ renkleri yine `PALET` verisinden alır.
 ## 8. Doğrulama (her değişiklikten sonra)
 
 ```bash
-node tests/dtnot-test.mjs     # 66 test: depo mantığı + i18n + mesajlaşma + manifest/paket kilidi
+node tests/dtnot-test.mjs     # 80 test: depo mantığı + i18n + mesajlaşma + manifest/paket kilidi + tema
 python3 build.py              # 4 çıktı: zip (Firefox/Zen), xpi, chrome zip, dist/chrome-unpacked
 ```
 
 Testler arayüzü şu noktalardan kilitler: `assets/ui.css`'in varlığı ve `[hidden]`
-kuralı, `.diller`/`.dil-dugme` yerleşimi, seçili renk vurgusu, popup genişliği +
-alt bağlantı, kullanılan her i18n anahtarının sözlükte olması, TR/EN anahtar
-kümelerinin eşitliği. Sınıf adı değiştirirken bu kilitleri kırmayın; yeni sınıf
+kuralı, `.diller`/`.dil-dugme` yerleşimi, üst bar ikonlarının bayrakla eşit
+ölçüsü, popup içi Ayarlar görünümü + "Yeni sayfada aç" bağlantısı
+(`openOptionsPage` + `tabs.create` yedeği), Ayarlar'da dil seçicinin yokluğu,
+varsayılan katlanır durumları (Hakkında açık · Veri kapalı), tema
+(varsayılan `koyu`, `acik` → `db-acik`, bozuk değer → `koyu`, seçicinin ortak
+render yolu), seçili renk vurgusu, popup genişliği + alt bağlantı, kullanılan her
+i18n anahtarının sözlükte olması, TR/EN anahtar kümelerinin ve `_locales`
+sözlüklerinin eşitliği. Sınıf adı değiştirirken bu kilitleri kırmayın; yeni sınıf
 eklerken önce standart sözlüğe bakın.
 
 ## 9. Dosya haritası
@@ -187,9 +201,10 @@ eklerken önce standart sözlüğe bakın.
 | Dosya | Rol |
 |---|---|
 | `assets/ui.css` | **tek tasarım kaynağı**: tokenlar + standart bileşenler + açık tema + DTNoT katmanı |
-| `assets/store.js` | veri katmanı + post-it `PALET` (veri) |
+| `assets/store.js` | veri katmanı + ayar modeli (`temizTema`) + post-it `PALET` (veri) |
 | `assets/i18n.js` | TR/EN sözlüğü + `.dil-dugme` bayrakları |
-| `popup.html` / `popup.js` | popup ekranı (448px) |
+| `assets/tema.js` | tema (koyu/açık): `db-acik` sınıfını uygulayan + popup/Ayarlar ortak seçici |
+| `popup.html` / `popup.js` | popup ekranı (448px) + popup içi Ayarlar görünümü |
 | `panel.html` / `panel.js` | Notlarım ekranı (liste, arama, renk filtresi) |
-| `options.html` / `options.js` | Ayarlar ekranı (katlanır bölümler, yedekleme) |
+| `options.html` / `options.js` | Ayarlar ekranı (katlanır bölümler, tema, yedekleme) |
 | `content.js` | sayfa üstü post-it/banner (gölge DOM, host sayfa) |
