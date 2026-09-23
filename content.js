@@ -150,6 +150,8 @@
       + '.serit__ust { position: relative; display: block; padding: 0 58px; }'
       + '.serit__metin { text-align: center; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 40vh; overflow: auto; }'
       + '.serit__dugme { position: absolute; right: 0; top: 0; display: flex; gap: 4px; }'
+      // Şeritteki menü, ✎ düğmesinin altında DERLİ TOPLU bir kart olsun (tam genişlik olmasın).
+      + '.serit .menu { align-self: flex-end; min-width: 170px; }'
       + '.etiket-ad { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; opacity: .7; margin-right: 6px; }'
       + '.ikon { all: unset; cursor: pointer; box-sizing: border-box; width: 24px; height: 24px; flex: none;'
       + ' line-height: 22px; text-align: center; border-radius: 7px; color: var(--ikon); background: var(--ikonBg);'
@@ -726,7 +728,8 @@
     duzenKap.hidden = true;
     // Boşken kutu görünmesin (sayfa tıklamalarını da engellemesin): yalnız menü ya da
     // düzenleyici AÇIKKEN görünür. Arka plan notun KENDİ rengidir → yazı okunur kalır.
-    const menuKap = document.createElement('div');
+    // DİKKAT: araya görünürlüğü yönetilmeyen bir sarmalayıcı KOYMA — menü gizli kalır
+    // ("minik boş alan açılıyor" hatası: kutu açılıyor, içindeki menü hidden sarmalayıcıda).
     const gorunumGuncelle = () => { disKap.hidden = duzenKap.hidden && menu.menu.hidden; };
     const duzenle = () => {
       if (duzenAcik) return;
@@ -747,9 +750,7 @@
     dugmeler.className = 'kose__dugme';
     const menu = menuKur(not, dugmeler, duzenle);
     menu.dugme.classList.add('ikon--mini');
-    // Menü kutusunu disKap'a taşı (şeridin dışında, okunur kalsın) + görünürlüğü bağla.
-    menuKap.hidden = true;
-    menuKap.appendChild(menu.menu);
+    // Menü DOĞRUDAN karta girer (araya sarmalayıcı yok) + görünürlüğü bağlanır.
     menu.dugme.addEventListener('click', gorunumGuncelle);
 
     const kapat = ikonDugme(t('icerik.gizleSure', { s: sureMetni() }), '\u00d7', 'ikon--mini');
@@ -762,7 +763,7 @@
     dugmeler.appendChild(kapat);
     serit.appendChild(dugmeler);
 
-    disKap.appendChild(menuKap);
+    disKap.appendChild(menu.menu);
     disKap.appendChild(duzenKap);
     disKap.hidden = true; // boşken görünmez (menü/düzenleyici açılınca gorunumGuncelle açar)
     kose.appendChild(serit);
