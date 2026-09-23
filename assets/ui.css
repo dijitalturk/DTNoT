@@ -944,7 +944,7 @@ html.db-acik .secici {
 /* =========================================================================
    3) DTNoT KATMANI — yalnız DTNoT'ya özel bileşenler.
    Kural: bu katmanda YENİ tema rengi uydurulmaz; renk daima --db-* ya da
-   post-it paletini (VERİ) taşıyan --not-*/--renk-* değişkenlerinden gelir.
+   post-it paletini (VERİ) taşıyan --not-… ve --renk-… değişkenlerinden gelir.
    ========================================================================= */
 
 /* DTNoT'ya özel türetilmiş tokenlar (hepsi standart palet ya da post-it verisi) */
