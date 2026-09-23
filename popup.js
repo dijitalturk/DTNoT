@@ -20,8 +20,9 @@
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'renk-sec';
-      b.style.background = p.bg || '#fdf6c9';
-      b.style.borderColor = p.kenar || '#e6d98a';
+      // Renk VERİDİR (PALET): karar CSS'te; burada yalnız değişken geçilir.
+      b.style.setProperty('--renk-bg', p.bg || '');
+      b.style.setProperty('--renk-kenar', p.kenar || '');
       b.setAttribute('aria-pressed', String(form.renk === renk));
       b.setAttribute('aria-label', T('renk.' + renk));
       b.title = T('renk.' + renk);
@@ -53,7 +54,7 @@
 
   function bildir(metin, tur) {
     const el = $('bildirim');
-    el.className = (tur === 'tamam') ? 'tamam' : (tur === 'hata') ? 'hata' : 'durum';
+    el.className = (tur === 'tamam') ? 'mesaj' : (tur === 'hata') ? 'mesaj mesaj--hata' : 'durum';
     el.dataset.hata = tur === 'hata' ? '1' : '';
     el.textContent = metin || '';
   }
@@ -82,6 +83,7 @@
     $('ayarAc').setAttribute('aria-label', T('ortak.ayarlar'));
     $('panelAc').title = T('panel.baslik');
     $('panelAc').setAttribute('aria-label', T('panel.baslik'));
+    try { $('altBilgi').textContent = 'DTNoT v' + chrome.runtime.getManifest().version; } catch (e) { /* yut */ }
     I.bayraklar($('diller'));
   }
 
@@ -102,7 +104,7 @@
     $('silDugme').hidden = !not;
     $('notOnizleme').hidden = !not;
     $('notRenk').hidden = !not;
-    if (not) $('notRenk').style.background = ((S.PALET || {})[not.renk] || {}).bg || '';
+    if (not) $('notRenk').style.setProperty('--renk-bg', ((S.PALET || {})[not.renk] || {}).bg || '');
     $('bannerRozet').hidden = !(not && not.banner === true);
     if (not) {
       $('notOnizleme').textContent = not.metin.length > 180 ? not.metin.slice(0, 180) + '…' : not.metin;
