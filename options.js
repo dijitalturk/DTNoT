@@ -48,7 +48,6 @@
     try { $('surum').textContent = chrome.runtime.getManifest().version; } catch (e) { $('surum').textContent = '—'; }
     $('surumEtiket').textContent = T('ayar.surumEtiket');
     try { $('altBilgi').textContent = 'DTNoT v' + chrome.runtime.getManifest().version; } catch (e) { /* yut */ }
-    I.bayraklar($('diller'));
     // seçenekler (dil değişince metinleri tazelenir)
     const strateji = $('strateji');
     const secili = strateji.value || 'merge';

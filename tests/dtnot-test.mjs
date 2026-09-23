@@ -518,6 +518,8 @@ await test('Ayarlar: DİL bölümü/seçici kaldırıldı (i18n altyapısı duru
   const kod = oku('options.js');
   assert.ok(!/govdeDil|baslikDil|ozetDil|dilSatir/.test(html), 'options.html içinde Dil bölümü kalmış');
   assert.ok(!/baslikDil|ozetDil|dilNot|dilSatir/.test(kod), 'options.js hâlâ Dil bölümünü dolduruyor');
+  assert.ok(!/id="diller"/.test(html), 'Ayarlar üst barında TR/EN bayrakları kalmış (dil seçici tamamen kalkmalı)');
+  assert.ok(!/I\.bayraklar\(/.test(kod), 'options.js hâlâ bayrak düğmeleri çiziyor');
   assert.match(kod, /I\.hazirla\(\)/, 'i18n altyapısı (hazirla) kaldırılmış');
   assert.match(oku('assets/i18n.js'), /'ayar\.dil'/, 'i18n sözlüğü korunmalı');
   assert.match(oku('assets/i18n.js'), /'ayar\.dilNot'/, 'i18n sözlüğü korunmalı');
