@@ -1,4 +1,6 @@
-# DTNoT 0.3.2 — Beta yayın dosyası (kopyala-yapıştır)
+# DTNoT 0.3.3 — Beta yayın dosyası (kopyala-yapıştır)
+
+> ℹ️ Güncel yükleme föyü: **`docs/AMO-YUKLEME.md`** — sürüm 0.3.3 ile birebir aynı içerik.
 
 > Durum: **hazır** · sürüm **0.3.2** · paketler: `dist/dtnot-0.3.2.zip` (Firefox/Zen),
 > `dist/dtnot-0.3.2-chrome.zip` (Chrome/Edge), `dist/dtnot-0.3.2.xpi` (imzalama öncesi).

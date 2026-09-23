@@ -1,7 +1,8 @@
 # DTNoT — sayfalara not bırakma eklentisi
 
-Gezindiğin web sayfalarına not bırak; aynı sayfaya döndüğünde notun **sol altta post-it** olarak
-karşına çıkar. Notlar yalnız tarayıcıda tutulur — hesap, sunucu, anahtar gerekmez.
+Sayfalara not bırak: **post-it** (sürüklenebilir), **banner**, **footer** ve **köşe etiketi**.
+Sayfa başına sınırsız not, site geneli işaretleme, yerinde düzenleme. Notlar yalnız tarayıcıda
+tutulur — hesap, sunucu, anahtar gerekmez.
 
 **Yığın:** saf JavaScript (derleme adımı YOK) · Manifest V3 · Firefox + Chrome.
 UX, kardeş proje **DTAI Tool**'un tasarım sistemi üzerine kuruldu (tek tip bileşenler, satır listesi,
@@ -14,7 +15,7 @@ TR/EN bayraklı dil değişimi, ayrı panel ve ayarlar sayfaları).
 
 | Tarayıcı | Yol |
 |---|---|
-| **Firefox / Zen** | `about:debugging#/runtime/this-firefox` → **Geçici Eklenti Yükle** → `dist/dtnot-0.1.0.zip` |
+| **Firefox / Zen** | `about:debugging#/runtime/this-firefox` → **Geçici Eklenti Yükle** → `dist/dtnot-0.3.3.zip` |
 | **Chrome / Edge** | `chrome://extensions` → **Geliştirici modu** → **Paketlenmemiş öğe yükle** → `dist/chrome-unpacked/` (ya da zip'i çıkartıp aynı yoldan) |
 
 İlk kurulumda eklenti **geniş izin istemez**: notlar `activeTab` ile hemen çalışır; sayfa üstünde
@@ -25,7 +26,7 @@ post-it çizmek için popup'taki **"İzin ver"** düğmesiyle site erişimi veri
 Derleme adımı yok — dosyayı düzenle, eklentiyi yenile:
 
 ```bash
-node tests/dtnot-test.mjs   # 105 test: depo mantığı · i18n · mesajlaşma deseni · manifest · renk/görünüm/konum · sayfa görünümü · popup · tema
+node tests/dtnot-test.mjs   # 111 test: depo mantığı · i18n · mesajlaşma deseni · manifest · renk/görünüm/konum · sayfa görünümü · popup · tema
 python3 build.py            # paketle: Firefox .zip/.xpi + Chrome -chrome.zip + chrome-unpacked/
 python3 ikon-uret.py        # ikon setini yeniden üret (16/32/48/96/128)
 ```
