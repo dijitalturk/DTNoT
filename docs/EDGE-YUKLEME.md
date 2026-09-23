@@ -15,8 +15,19 @@ Edge tarafı AMO'dan **bağımsız** ilerler; ikisi paralel yürüyebilir.
 
 ## 1) Hesap + akış (6 adım)
 
-1. `https://partner.microsoft.com/dashboard/microsoftedge/overview` → **Microsoft hesabıyla giriş**
-   (Edge programına kayıt **ücretsiz**; Chrome'un aksine ücret yok)
+> ⚠️ **Edge programına kayıt ayrı bir adım.** `.../dashboard/microsoftedge/overview` adresi, kayıtlı
+> değilsen ana sayfaya atar (başımıza geldi). Resmî yol:
+> **`https://partner.microsoft.com/dashboard/account/v3/settings/programs`** → **Microsoft Edge**
+> kartı → **Get started** → *Microsoft Edge Developer Account Registration* formu açılır.
+> - **Hesap türü: Individual (şahıs)** — doğrulaması daha kısa (şirket hesabı belge ister)
+> - **Ülke/bölge: Türkiye** — kayıttan sonra **değiştirilemez**, dikkatli seç
+> - **Yayıncı adı**: mağazada görünecek isim (örn. `DijitalTurk`)
+> - ⚠️ Giriş **Microsoft hesabı (outlook.com / live.com / hotmail.com)** ile olmalı; iş/okul hesabı
+>   ile Edge programına kayıt olunmuyor.
+> - Ücret yok (Chrome'un aksine 5 $ istenmez) · kayıt sonrası **Create new extension** çıkar.
+
+1. `https://partner.microsoft.com/dashboard/microsoftedge/public/login` → **Microsoft hesabıyla giriş**
+   (kayıt formu kendiliğinden açılmazsa yukarıdaki *Account settings → Programs* yolunu kullan)
 2. **Create new extension** → eklenti adını yaz → *Create*
 3. **Packages** → `dtnot-0.3.3-chrome.zip` dosyasını yükle
 4. **Store listings** → dil seç (Türkçe; istersen İngilizce de ekle) → §2 alanlarını doldur
@@ -52,6 +63,9 @@ DTNoT, web sayfalarına hızlıca not bırakmanı sağlar. Bir sayfaya döndüğ
 
 GİZLİLİK: Hesap yok, sunucu yok, ağ isteği yok. Notların yalnız kendi bilgisayarında, tarayıcı deposunda tutulur; hiçbir yere gönderilmez.
 ```
+
+> ℹ️ Edge, **Extension name** ve **Description** alanlarını paketteki `manifest.json`'dan doldurur.
+> Description kısa metinle (manifest açıklaması) önceden dolu gelebilir → yukarıdaki **uzun metinle değiştir**.
 
 **Kategori**
 ```
