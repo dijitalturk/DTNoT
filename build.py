@@ -41,9 +41,23 @@ def calisma_dosyalari():
 
 
 def chrome_manifesti(m):
+    """Chrome/Edge paketi: gecko'ya özel anahtarlar + Firefox'a özel arka plan anahtarı çıkar."""
     ch = json.loads(json.dumps(m))
     ch.pop('browser_specific_settings', None)
+    if 'background' in ch:
+        ch['background'].pop('scripts', None)   # Chrome: background.scripts geçersiz (MV3)
     return ch
+
+
+def firefox_manifesti(m):
+    """Firefox/Zen paketi: Chrome'a özel arka plan anahtarı çıkarılır.
+
+    Firefox `background.service_worker`'ı yok sayar (addons-linter uyarısı:
+    BACKGROUND_SERVICE_WORKER_IGNORED) — pakette hiç durmasın."""
+    ff = json.loads(json.dumps(m))
+    if 'background' in ff:
+        ff['background'].pop('service_worker', None)
+    return ff
 
 
 def dogrula(hedef, m):
@@ -134,14 +148,22 @@ def main():
 
     adlar = []
     for uzanti in ('zip', 'xpi'):
-        adlar.append(paket_yaz(os.path.join(DIST, f'dtnot-{surum}.{uzanti}'), m))
+        adlar.append(paket_yaz(os.path.join(DIST, f'dtnot-{surum}.{uzanti}'), m, firefox_manifesti(m)))
     adlar.append(paket_yaz(os.path.join(DIST, f'dtnot-{surum}-chrome.zip'), m, chrome_manifesti(m)))
 
-    # Chrome paketinde gecko'ya özel anahtar KALMAMALI (paketleyicinin asıl işi bu)
+    # Firefox paketinde `service_worker` KALMAMALI (Firefox yok sayar; AMO linter uyarır)
+    with zipfile.ZipFile(adlar[0]) as z:
+        ff_kontrol = json.loads(z.read('manifest.json'))
+        assert 'service_worker' not in ff_kontrol.get('background', {}), 'Firefox paketinde service_worker kalmış!'
+        assert ff_kontrol['background'].get('scripts'), 'Firefox paketinde background.scripts yok!'
+        assert ff_kontrol.get('browser_specific_settings', {}).get('gecko', {}).get('id'), 'Firefox paketinde gecko id yok!'
+
+    # Chrome paketinde gecko anahtarları ve `scripts` KALMAMALI
     with zipfile.ZipFile(adlar[-1]) as z:
         ch_kontrol = json.loads(z.read('manifest.json'))
         assert 'browser_specific_settings' not in ch_kontrol, 'Chrome paketinde browser_specific_settings kalmış!'
         assert ch_kontrol['background'].get('service_worker'), 'Chrome paketinde service_worker yok!'
+        assert 'scripts' not in ch_kontrol['background'], 'Chrome paketinde background.scripts kalmış!'
 
     klasor = os.path.join(DIST, 'chrome-unpacked')
     if os.path.exists(klasor):
