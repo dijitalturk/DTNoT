@@ -524,6 +524,19 @@ await test('Ayarlar: DİL bölümü/seçici kaldırıldı (i18n altyapısı duru
   assert.match(oku('assets/i18n.js'), /'ayar\.dil'/, 'i18n sözlüğü korunmalı');
   assert.match(oku('assets/i18n.js'), /'ayar\.dilNot'/, 'i18n sözlüğü korunmalı');
 });
+await test('Ayarlar: “Hakkında” bölümü VARSAYILAN AÇIK, diğer varsayılanlar korunuyor', () => {
+  const html = oku('options.html');
+  const hakkinda = html.match(/<section[^>]*data-acik="true"[^>]*>\s*<button[^>]*aria-controls="govdeHakkinda"[\s\S]{0,900}?<\/section>/);
+  assert.ok(hakkinda, 'Hakkında bölümü bulunamadı / data-acik="true" değil');
+  assert.match(hakkinda[0], /aria-expanded="true"/, 'aria-expanded true değil');
+  assert.match(hakkinda[0], /id="govdeHakkinda"(?![^>]*hidden)/, 'Hakkında gövdesi hâlâ hidden');
+  assert.match(hakkinda[0], /class="katlanir__ok"[^>]*>▾/, 'ok açık duruma (▾) getirilmemiş');
+  // Diğer bölümlerin varsayılanları korunmalı: Davranış açık, Veri kapalı
+  assert.match(html, /<section[^>]*data-acik="true"[^>]*>\s*<button[^>]*aria-controls="govdeDavranis"/, 'Davranış varsayılanı bozulmuş (açık olmalı)');
+  assert.match(html, /<section[^>]*data-acik="false"[^>]*>\s*<button[^>]*aria-controls="govdeVeri"/, 'Veri varsayılanı bozulmuş (kapalı olmalı)');
+  assert.match(html, /id="govdeVeri" hidden/, 'Veri gövdesi kapalı gelmiyor');
+  assert.match(oku('options.js'), /uygula\(bolum\.dataset\.acik !== 'false'\)/, 'katlanir varsayılanı data-acik üzerinden kurulmuyor');
+});
 await test('content.js: banner sayfayı aşağı ittiriyor (üstüne binmiyor)', () => {
   const kod = oku('content.js');
   assert.match(kod, /function sayfaIttir/, 'sayfaIttir yok');
