@@ -7,25 +7,36 @@
   <link rel="stylesheet" href="assets/ui.css" />
 </head>
 <body class="tam-sayfa">
-  <div class="govde">
-    <header class="ust" style="border:1px solid var(--cizgi);border-radius:12px;box-shadow:var(--golge)">
-      <div class="marka">DTNoT<small id="altBaslik">Notlarım</small></div>
-      <div id="diller" class="diller" role="group" aria-label="Dil"></div>
-      <button type="button" id="ayarAc" class="ikon-dugme" title="Ayarlar" aria-label="Ayarlar">⚙</button>
+  <div class="govde yigin">
+    <header class="topbar">
+      <span class="marka-kutu" aria-hidden="true">📝</span>
+      <div class="topbar__metin min-w-0">
+        <h1 class="topbar__baslik">DTNoT</h1>
+        <p class="topbar__alt" id="altBaslik">Notlarım</p>
+      </div>
+      <div class="topbar__sag">
+        <div id="diller" class="diller" role="group" aria-label="Dil"></div>
+        <button type="button" id="ayarAc" class="ikon-dugme ikon-dugme--soluk" title="Ayarlar" aria-label="Ayarlar">⚙</button>
+      </div>
     </header>
 
-    <div class="arama-satir" style="margin-top:14px">
-      <input id="arama" class="alan" type="search" />
+    <div class="toolbar">
+      <input id="arama" class="girdi" type="search" />
       <label class="onay"><input type="checkbox" id="sadeceAktif" /> <span id="sadeceAktifEtiket"></span></label>
     </div>
 
-    <div class="flex items-center gap-2" style="margin-bottom:10px;flex-wrap:wrap">
+    <div class="toolbar">
       <span class="etiket" id="renkFiltreEtiket"></span>
       <div id="renkFiltre" class="renkler" role="group"></div>
     </div>
 
     <div id="bildirim" class="durum"></div>
-    <div id="liste" style="margin-top:10px"></div>
+    <div id="liste"></div>
+
+    <div class="altbilgi">
+      <span id="altBilgi"></span>
+      <a class="altbilgi__link" href="https://DijitalTurk.com" target="_blank" rel="noreferrer noopener">DijitalTurk.com</a>
+    </div>
   </div>
 
   <script src="assets/store.js"></script>

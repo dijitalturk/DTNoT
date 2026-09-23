@@ -38,6 +38,7 @@
     $('sadeceAktifEtiket').textContent = T('panel.sadeceAktif');
     $('renkFiltreEtiket').textContent = T('panel.renkFiltre');
     $('ayarAc').title = T('ortak.ayarlar');
+    try { $('altBilgi').textContent = 'DTNoT v' + chrome.runtime.getManifest().version; } catch (e) { /* yut */ }
     I.bayraklar($('diller'));
     renkFiltreCiz();
   }
@@ -50,13 +51,11 @@
     secenekler.forEach(([deger, p]) => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'renk-sec';
+      b.className = p ? 'renk-sec' : 'renk-sec renk-sec--tumu';
       if (p) {
-        b.style.background = p.bg;
-        b.style.borderColor = p.kenar;
-      } else {
-        b.style.background = 'linear-gradient(135deg,#fdf6c9 0 25%,#dcf5e4 25% 50%,#dbeafe 50% 75%,#fde2ef 75% 100%)';
-        b.style.borderColor = 'var(--cizgi)';
+        // Renk VERİDİR (PALET): karar CSS'te; burada yalnız değişken geçilir.
+        b.style.setProperty('--renk-bg', p.bg);
+        b.style.setProperty('--renk-kenar', p.kenar);
       }
       b.setAttribute('aria-pressed', String(renkFiltre === deger));
       b.setAttribute('aria-label', deger === 'tumu' ? T('ortak.tumu') : T('renk.' + deger));
@@ -68,7 +67,7 @@
 
   function bildir() {
     const el = $('bildirim');
-    el.className = (mesaj.tur === 'tamam') ? 'tamam' : (mesaj.tur === 'hata') ? 'hata' : 'durum';
+    el.className = (mesaj.tur === 'tamam') ? 'mesaj' : (mesaj.tur === 'hata') ? 'mesaj mesaj--hata' : 'durum';
     el.dataset.hata = mesaj.tur === 'hata' ? '1' : '';
     el.textContent = mesaj.metin || '';
   }
@@ -85,7 +84,7 @@
   function dugme(etiket, sinif, tiklama) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'dugme ' + sinif;
+    b.className = 'btn ' + sinif;
     b.textContent = etiket;
     b.addEventListener('click', tiklama);
     return b;
@@ -97,10 +96,10 @@
 
     const sol = document.createElement('div');
     const ust = document.createElement('div');
-    ust.className = 'flex items-center gap-2';
+    ust.className = 'toolbar';
     const nokta = document.createElement('span');
     nokta.className = 'renk-nokta';
-    nokta.style.background = ((S.PALET || {})[k.renk] || {}).bg || '';
+    nokta.style.setProperty('--renk-bg', ((S.PALET || {})[k.renk] || {}).bg || '');
     nokta.title = T('renk.' + (k.renk || 'sari'));
     ust.appendChild(nokta);
     const yol = document.createElement('div');
@@ -110,7 +109,7 @@
     ust.appendChild(yol);
     if (k.banner === true) {
       const rb = document.createElement('span');
-      rb.className = 'rozet rozet-banner';
+      rb.className = 'pill pill--warn';
       rb.textContent = k.siteGeneli === true ? 'BANNER · SITE' : 'BANNER';
       ust.appendChild(rb);
     }
@@ -118,16 +117,14 @@
 
     if (duzenlenen === k.anahtar) {
       const alan = document.createElement('textarea');
-      alan.className = 'alan';
+      alan.className = 'girdi mt-1';
       alan.value = k.metin;
-      alan.style.marginTop = '6px';
       sol.appendChild(alan);
 
       const yerel = { renk: k.renk || 'sari', banner: k.banner === true, siteGeneli: k.siteGeneli === true };
 
       const satirRenk = document.createElement('div');
-      satirRenk.className = 'flex items-center gap-2 flex-wrap';
-      satirRenk.style.marginTop = '8px';
+      satirRenk.className = 'toolbar mt-2';
       const etiketRenk = document.createElement('span');
       etiketRenk.className = 'etiket';
       etiketRenk.textContent = T('not.renk');
@@ -139,8 +136,8 @@
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'renk-sec';
-        b.style.background = p.bg;
-        b.style.borderColor = p.kenar;
+        b.style.setProperty('--renk-bg', p.bg);
+        b.style.setProperty('--renk-kenar', p.kenar);
         b.setAttribute('aria-pressed', String(yerel.renk === r));
         b.title = T('renk.' + r);
         b.addEventListener('click', () => {
@@ -189,7 +186,7 @@
 
       const alt = document.createElement('div');
       alt.className = 'not-alt';
-      alt.appendChild(dugme(T('ortak.kaydet'), '', async () => {
+      alt.appendChild(dugme(T('ortak.kaydet'), 'btn--kaydet', async () => {
         if (!alan.value.trim()) { mesaj = { metin: T('popup.metinGerekli'), tur: 'hata' }; bildir(); return; }
         const r = await cagri('NOT_GUNCELLE', {
           anahtar: k.anahtar,
@@ -206,7 +203,7 @@
         mesaj = r ? { metin: T('popup.kaydedildi'), tur: 'tamam' } : { metin: T('popup.kaydetHata'), tur: 'hata' };
         await yukle();
       }));
-      alt.appendChild(dugme(T('ortak.vazgec'), 'dugme--ikincil', () => { duzenlenen = null; ciz(); }));
+      alt.appendChild(dugme(T('ortak.vazgec'), 'btn--kucuk', () => { duzenlenen = null; ciz(); }));
       sol.appendChild(alt);
       satir.appendChild(sol);
       satir.appendChild(document.createElement('div'));
@@ -228,12 +225,12 @@
     t.className = 'not-tarih';
     t.textContent = T('panel.sonGuncelleme') + ': ' + tarih(k.guncelleme);
     alt.appendChild(t);
-    alt.appendChild(dugme(T('panel.sayfaAc'), 'dugme--ikincil dugme--kucuk', async () => {
+    alt.appendChild(dugme(T('panel.sayfaAc'), 'btn--kucuk', async () => {
       const r = await cagri('SAYFA_AC', { anahtar: k.anahtar });
       if (!r || !r.ok) { mesaj = { metin: T('popup.kaydetHata'), tur: 'hata' }; bildir(); }
     }));
-    alt.appendChild(dugme(T('ortak.duzenle'), 'dugme--ikincil dugme--kucuk', () => { duzenlenen = k.anahtar; ciz(); }));
-    alt.appendChild(dugme(T('ortak.sil'), 'dugme--tehlike dugme--kucuk', async () => {
+    alt.appendChild(dugme(T('ortak.duzenle'), 'btn--kucuk', () => { duzenlenen = k.anahtar; ciz(); }));
+    alt.appendChild(dugme(T('ortak.sil'), 'btn--danger btn--kucuk', async () => {
       if (!window.confirm(T('ortak.silOnay'))) return;
       const r = await cagri('NOT_SIL', { anahtar: k.anahtar });
       mesaj = r ? { metin: T('popup.silindi'), tur: 'tamam' } : { metin: T('popup.kaydetHata'), tur: 'hata' };
@@ -250,7 +247,7 @@
 
     if (!gorunen.length) {
       const bos = document.createElement('div');
-      bos.className = 'bos';
+      bos.className = 'bos-durum';
       bos.textContent = notlar.length
         ? (arama.trim() ? T('panel.bosArama', { q: arama.trim() }) : T('panel.bosSite'))
         : T('panel.bos');
@@ -268,7 +265,7 @@
       host.textContent = grup.host || '—';
       bas.appendChild(host);
       const rozet = document.createElement('span');
-      rozet.className = 'rozet';
+      rozet.className = 'pill pill--soluk';
       rozet.textContent = T('panel.toplam', { n: grup.notlar.length });
       bas.appendChild(rozet);
       kutu.appendChild(bas);
