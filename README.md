@@ -25,7 +25,7 @@ post-it çizmek için popup'taki **"İzin ver"** düğmesiyle site erişimi veri
 Derleme adımı yok — dosyayı düzenle, eklentiyi yenile:
 
 ```bash
-node tests/dtnot-test.mjs   # 86 test: depo mantığı · i18n · mesajlaşma deseni · manifest · renk/banner/sürükleme · tema · popup Ayarlar görünümü
+node tests/dtnot-test.mjs   # 105 test: depo mantığı · i18n · mesajlaşma deseni · manifest · renk/görünüm/konum · sayfa görünümü · popup · tema
 python3 build.py            # paketle: Firefox .zip/.xpi + Chrome -chrome.zip + chrome-unpacked/
 python3 ikon-uret.py        # ikon setini yeniden üret (16/32/48/96/128)
 ```
@@ -85,7 +85,33 @@ Dosya düzeni:
   filtreleyip gösterir".
 - **86 test** · Chrome ve Firefox'ta ölçüldü.
 
-## Ayarlar / tema güncellemeleri (paket sürümü değişmedi: 0.2.1)
+## 0.3.0 — sınırsız not · dört görünüm · yerinde düzenleme
+
+- **Sayfa başına SINIRSIZ not.** Her not artık bir **kimlik** (`id`) taşır; eskiden bir sayfada tek not
+  olabiliyordu (anahtar = host+yol tekildi). Depo şeması **v2**; eski kayıtlar okunurken sessizce taşınır
+  (`id = 'k:' + anahtar`, `gorunum = banner ? 'banner' : 'postit'`) — **veri kaybı yok**.
+- **Dört görünüm seçimi:** not eklerken/düzenlerken **Post-it · Banner · Footer · Etiket**.
+  - *Post-it:* sürüklenebilir kart (konum pencere oranı olarak saklanır).
+  - *Banner:* sayfanın en tepesinde şerit; sayfayı aşağı ittirir (header'ın üstüne binmez).
+  - *Footer:* sayfanın en altında şerit; sayfanın altına boşluk eklenir (içeriği örtmez).
+  - *Etiket:* **sağ alt köşede çapraz durak** — bir ucu alt kenara, bir ucu sağ kenara dayalı 45° şerit.
+- **Her not site geneli işaretlenebilir** — artık banner'a bağlı değil; post-it/footer/etiket de
+  işaretlenince o sitenin tüm sayfalarında görünür.
+- **✎ düğmesi ×'in yanında:** her notta menü açılır → **Düzenle** (metin + renk + görünüm + site geneli,
+  yerinde) / **Sil**.
+- **Post-it'lerin sağ altında küçük `DijitalTurk.com` bağlantısı** (yeni sekmede açılır).
+- **Banner · footer · etiket yazıları ORTALANIR:** ✎ / × düğmeleri şeridin sağ ucunda mutlak konumdadır,
+  metin şeridin tam ortasında durur (ölçüldü: merkez sapması 0 px).
+- **Popup düzeni düzeltildi:** "Not ekle" düğmesi artık **not listesinin üstünde**; sayfada not yoksa
+  **"Bu sayfada not yok."** uyarısı görünür; bu sayfadaki notlar kart listesi olarak (renk · görünüm ·
+  site geneli rozeti · Düzenle/Sil) altında listelenir.
+- **Notlarım paneli:** satır rozetinde görünüm + `SİTE` etiketi; satır içi düzenleme görünüm seçici sunar.
+- **Ölçüm:** 105/105 test · Chrome (uçtan uca: SW + 4 not + site geneli + güncelle/sil) ·
+  sayfa katmanı gerçek Chromium'da (2 post-it · banner · footer · etiket · ✎ menüsü · yerinde düzenleyici) ·
+  popup (not ekle üstte · 3 kart · boş durum uyarısı) · panel (gruplar · rozetler · düzenleme formu).
+- Paket: `dist/dtnot-0.3.0.{zip,xpi}` + `-chrome.zip` · 20 dosya.
+
+## Ayarlar / tema güncellemeleri (0.2.1)
 
 - **Ayarlar popup İÇİNDE açılıyor** (sekme açılmıyor, popup kapanmıyor) ve **options.html ile aynı
   katlanır bölümleri** gösterir: **Davranış** (gizleme süresi · "Yalnız aktif site" · tema seçici) ·

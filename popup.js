@@ -1,11 +1,11 @@
 /* DTNoT — popup: İKİ görünüm.
-   (1) NOT görünümü (varsayılan): aktif sayfanın notu + hızlı ekleme + izin + Notlarım.
+   (1) NOT görünümü (varsayılan): aktif sayfanın adresi → **Not ekle** (listenin ÜSTÜNDE)
+       → bu sayfadaki notların listesi (yoksa "Bu sayfada not yok.").
    (2) AYARLAR görünümü (⚙ ile, popup İÇİNDE açılır; popup kapanmaz): options.html ile
        AYNI katlanır bölümler (tema + Davranış · Veri · Hakkında), en altta
        "Sayfada göster" bağlantısı (openOptionsPage + tabs.create yedeği).
-   Not ekleme/listesi BURADA OLMAZ: onların yeri Notlarım ekranı (panel.html/js);
-   bu yüzden ⚙ Ayarlar açıkken not görünümü tümüyle gizlenir. ✕ kapatma düğmesi YOK
-   (Ayarlar yine ⚙ ile kapanır). Tüm metinler TR/EN; dil değişince yeniden çizilir. */
+   Not ekleme formu TEK: yeni not ekler; listedeki "Düzenle" aynı formu doldurup
+   kaydı günceller. Tüm metinler TR/EN; dil değişince yeniden çizilir. */
 (function () {
   'use strict';
 
@@ -15,10 +15,11 @@
   const $ = (id) => document.getElementById(id);
   const saatAnahtar = (s) => 'saat.' + s;
 
-  let durum = { url: '', anahtar: '', tabId: null, izin: null, kayitli: false, toplam: 0, not: null, ayarlar: {} };
-  const form = { renk: 'sari', banner: false, siteGeneli: false };
+  let durum = { url: '', anahtar: '', tabId: null, izin: null, kayitli: false, toplam: 0, notlar: [], ayarlar: {} };
+  const form = { renk: 'sari', gorunum: 'postit', siteGeneli: false };
+  let duzenlenenId = null; // null → yeni not; dolu → o kaydı güncelle
 
-  /** 6 renk seçici — palet tek kaynaktan gelir (DTNOT_STORE.PALET). */
+  /* ---------- Renk seçici (6 renk, palet tek kaynaktan) ---------- */
   function renkSeciciCiz() {
     const kap = $('renkler');
     kap.textContent = '';
@@ -40,15 +41,36 @@
     if (etiket) etiket.textContent = T('not.renkSecili', { renk: T('renk.' + form.renk) });
   }
 
-  /** Formu mevcut nota göre doldur (yeni notta varsayılanlar). */
+  /* ---------- Görünüm seçici (post-it · banner · footer · etiket) ---------- */
+  function gorunumSeciciCiz() {
+    const kap = $('gorunumSec');
+    if (!kap) return;
+    kap.textContent = '';
+    (S.GORUNUMLER || ['postit']).forEach((g) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'tur-dugme';
+      b.dataset.gorunum = g;
+      b.setAttribute('aria-pressed', String(form.gorunum === g));
+      b.setAttribute('aria-label', T('gorunum.' + g));
+      b.title = T('gorunum.' + g);
+      b.textContent = T('gorunum.' + g);
+      b.addEventListener('click', () => { form.gorunum = g; gorunumSeciciCiz(); });
+      kap.appendChild(b);
+    });
+  }
+
+  /** Formu başlangıç durumuna al (yeni not) ya da bir kaydın değerleriyle doldur. */
   function formuYukle(not) {
+    duzenlenenId = not ? not.id : null;
     form.renk = (not && not.renk) || S.RENK_VARSAYILAN || 'sari';
-    form.banner = !!(not && not.banner === true);
+    form.gorunum = not ? ((S.gorunumOf ? S.gorunumOf(not) : not.gorunum) || 'postit') : 'postit';
     form.siteGeneli = !!(not && not.siteGeneli === true);
-    $('bannerChk').checked = form.banner;
+    $('metin').value = not ? String(not.metin || '') : '';
     $('siteGeneliChk').checked = form.siteGeneli;
-    $('siteGeneliChk').disabled = !form.banner;
+    $('formBaslik').textContent = not ? T('popup.duzenleBaslik') : T('popup.yeniNot');
     renkSeciciCiz();
+    gorunumSeciciCiz();
   }
 
   async function mesaj(tip, veri) {
@@ -77,13 +99,13 @@
     $('ekleAc').textContent = T('popup.ekle');
     $('metin').placeholder = T('popup.eklePlaceholder');
     $('renkEtiket').textContent = T('not.renk');
-    $('bannerEtiket').textContent = T('not.banner');
-    $('bannerNotu').textContent = T('not.bannerNot');
+    $('gorunumEtiket').textContent = T('not.gorunum');
     $('siteGeneliEtiket').textContent = T('not.siteGeneli');
     $('siteGeneliNotu').textContent = T('not.siteGeneliNot');
     $('kaydet').textContent = T('ortak.kaydet');
     $('vazgec').textContent = T('ortak.vazgec');
-    $('silDugme').textContent = T('ortak.sil');
+    $('sayfaNotBaslik').textContent = T('popup.buSayfadakiNotlar');
+    $('sayfaNotYok').textContent = T('popup.sayfaNotYok');
     $('havuzBaslik').textContent = T('ortak.panel');
     $('panelDugme').textContent = T('panel.baslik');
     $('ayarAc').title = T('ortak.ayarlar');
@@ -111,9 +133,62 @@
     gizlemeSecenekleriCiz();
     try { $('altBilgi').textContent = 'DTNoT v' + chrome.runtime.getManifest().version; } catch (e) { /* yut */ }
     I.bayraklar($('diller'));
+    // Form açıkken başlık/etiketler dil değişiminde tazelensin
+    if (!$('ekleKutu').hidden) $('formBaslik').textContent = duzenlenenId ? T('popup.duzenleBaslik') : T('popup.yeniNot');
   }
 
   /* ---------- Görünüm ---------- */
+  function dugme(etiket, sinif, tiklama) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn ' + sinif;
+    b.textContent = etiket;
+    b.addEventListener('click', tiklama);
+    return b;
+  }
+
+  /** Bu sayfadaki bir notun satırı: renk · görünüm · site geneli · metin · Düzenle/Sil. */
+  function notSatiri(k) {
+    const kutu = document.createElement('div');
+    kutu.className = 'not-kart';
+
+    const ust = document.createElement('div');
+    ust.className = 'not-kart__ust';
+    const nokta = document.createElement('span');
+    nokta.className = 'renk-nokta';
+    nokta.style.setProperty('--renk-bg', ((S.PALET || {})[k.renk] || {}).bg || '');
+    nokta.title = T('renk.' + (k.renk || 'sari'));
+    ust.appendChild(nokta);
+    const tur = document.createElement('span');
+    tur.className = 'pill pill--soluk';
+    tur.textContent = T('gorunum.' + ((S.gorunumOf ? S.gorunumOf(k) : k.gorunum) || 'postit'));
+    ust.appendChild(tur);
+    if (k.siteGeneli === true) {
+      const sg = document.createElement('span');
+      sg.className = 'pill pill--warn';
+      sg.textContent = T('panel.siteGeneliRozet');
+      ust.appendChild(sg);
+      const nik = document.createElement('span');
+      nik.className = 'not-kart__yol truncate';
+      nik.textContent = S.kisaltOrtadan(k.anahtar, 40);
+      nik.title = k.anahtar;
+      ust.appendChild(nik);
+    }
+    kutu.appendChild(ust);
+
+    const metin = document.createElement('div');
+    metin.className = 'not-kart__metin';
+    metin.textContent = String(k.metin == null ? '' : k.metin);
+    kutu.appendChild(metin);
+
+    const alt = document.createElement('div');
+    alt.className = 'not-alt';
+    alt.appendChild(dugme(T('ortak.duzenle'), 'btn--kucuk', () => duzenleBasla(k)));
+    alt.appendChild(dugme(T('ortak.sil'), 'btn--danger btn--kucuk', () => sil(k)));
+    kutu.appendChild(alt);
+    return kutu;
+  }
+
   function ciz() {
     const varSayfa = !!durum.anahtar;
     $('sayfaAdres').textContent = varSayfa ? S.kisaltOrtadan(durum.anahtar, 46) : T('popup.sayfaYok');
@@ -126,15 +201,12 @@
     $('izinKutu').hidden = !izinYok;
     $('canliRozet').hidden = !(durum.izin === true && durum.kayitli);
 
-    const not = durum.not;
-    $('silDugme').hidden = !not;
-    $('notOnizleme').hidden = !not;
-    $('notRenk').hidden = !not;
-    if (not) $('notRenk').style.setProperty('--renk-bg', ((S.PALET || {})[not.renk] || {}).bg || '');
-    $('bannerRozet').hidden = !(not && not.banner === true);
-    if (not) {
-      $('notOnizleme').textContent = not.metin.length > 180 ? not.metin.slice(0, 180) + '…' : not.metin;
-    }
+    // Bu sayfadaki notlar — liste "Not ekle" düğmesinin ALTINDA kalır.
+    $('sayfaNotSayi').textContent = String(durum.notlar.length);
+    $('sayfaNotYok').hidden = !(varSayfa && durum.notlar.length === 0);
+    const kap = $('sayfaNotlar');
+    kap.textContent = '';
+    durum.notlar.forEach((k) => kap.appendChild(notSatiri(k)));
   }
 
   /* ---------- Veri ---------- */
@@ -145,48 +217,49 @@
     ]);
     if (sayfa) { durum.url = sayfa.url; durum.anahtar = sayfa.anahtar; durum.tabId = sayfa.tabId; }
     if (durumR) { durum.izin = durumR.izin; durum.kayitli = durumR.kayitli; durum.toplam = durumR.toplam || 0; }
-    const notR = durum.anahtar ? await mesaj('NOT_AL', { anahtar: durum.anahtar }) : null;
-    durum.not = notR ? notR.not : null;
-    if (!durum.not && durum.anahtar) {
-      const ham = notR ? notR.ham : null;
-      if (ham) $('notOnizleme').textContent = '';
-    }
+    const r = durum.anahtar ? await mesaj('SAYFA_NOTLARI', { url: durum.url }) : null;
+    durum.notlar = (r && r.tumu) ? r.tumu : [];
     ciz();
     ozetYaz();
     if (mesajGoster) bildir(mesajGoster.metin, mesajGoster.tur);
   }
 
   /* ---------- Eylemler ---------- */
-  async function ekleModu(ac) {
+  function ekleModu(ac, not) {
     $('ekleKutu').hidden = !ac;
+    $('ekleAc').hidden = !!ac; // form açıkken "Not ekle" düğmesi görünmez
     if (ac) {
-      formuYukle(durum.not);
-      $('metin').value = durum.not ? durum.not.metin : '';
+      formuYukle(not || null);
       $('metin').focus();
+    } else {
+      formuYukle(null);
     }
+  }
+
+  function duzenleBasla(k) {
+    ekleModu(true, k);
+    $('ekleKutu').scrollIntoView({ block: 'nearest' });
   }
 
   async function kaydet() {
     const metin = $('metin').value;
     if (!metin.trim()) { bildir(T('popup.metinGerekli'), 'hata'); return; }
-    const r = await mesaj('NOT_EKLE', {
-      url: durum.url,
-      metin: metin,
-      renk: form.renk,
-      banner: form.banner,
-      siteGeneli: form.siteGeneli,
-    });
+    const ortak = { metin: metin, renk: form.renk, gorunum: form.gorunum, siteGeneli: form.siteGeneli };
+    const r = duzenlenenId
+      ? await mesaj('NOT_GUNCELLE', { id: duzenlenenId, patch: Object.assign({ kucuk: false, gizleUntil: 0 }, ortak) })
+      : await mesaj('NOT_EKLE', Object.assign({ url: durum.url }, ortak));
     if (!r || !r.not) { bildir(T('popup.kaydetHata'), 'hata'); return; }
-    await ekleModu(false);
+    ekleModu(false);
     await tazele({ metin: T('popup.kaydedildi'), tur: 'tamam' });
     if (durum.tabId != null) mesaj('ICERIK_YENILE', { tabId: durum.tabId });
   }
 
-  async function sil() {
-    if (!durum.not) return;
+  async function sil(k) {
+    if (!k) return;
     if (!window.confirm(T('ortak.silOnay'))) return;
-    const r = await mesaj('NOT_SIL', { anahtar: durum.not.anahtar });
+    const r = await mesaj('NOT_SIL', { id: k.id });
     if (!r) { bildir(T('popup.kaydetHata'), 'hata'); return; }
+    if (duzenlenenId === k.id) ekleModu(false);
     await tazele({ metin: T('popup.silindi'), tur: 'tamam' });
     if (durum.tabId != null) mesaj('ICERIK_YENILE', { tabId: durum.tabId });
   }
@@ -335,24 +408,15 @@
     katlanirlariKur(); // Ayarlar bölümleri: varsayılan açık/kapalı hâlleri data-acik'tan
     // Tema seçici: ORTAK render yolu (assets/tema.js) — sayfada kopya kod yok.
     if (TM) TM.seciciKur($('tema'), () => bildir(T('popup.kaydedildi'), 'tamam'));
-    formuYukle(null);
+    ekleModu(false);
     await tazele();
     await ayarlariYukle();
-    if (await bekleyeniTüket()) await ekleModu(true);
+    if (await bekleyeniTüket()) ekleModu(true);
 
     $('ekleAc').addEventListener('click', () => ekleModu($('ekleKutu').hidden));
-    $('bannerChk').addEventListener('change', (e) => {
-      form.banner = e.target.checked;
-      $('siteGeneliChk').disabled = !form.banner;
-      if (!form.banner) {
-        $('siteGeneliChk').checked = false;
-        form.siteGeneli = false;
-      }
-    });
     $('siteGeneliChk').addEventListener('change', (e) => { form.siteGeneli = e.target.checked; });
     $('kaydet').addEventListener('click', kaydet);
     $('vazgec').addEventListener('click', () => ekleModu(false));
-    $('silDugme').addEventListener('click', sil);
     $('izinVer').addEventListener('click', izinAl);
     $('panelAc').addEventListener('click', () => sekmeAc('panel.html'));
     $('panelDugme').addEventListener('click', () => sekmeAc('panel.html'));
@@ -379,5 +443,11 @@
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) kaydet();
     });
     I.abone(() => { etiketle(); ciz(); ozetYaz(); });
+    // Depo başka yerden değişirse (panel/başka sekme) liste tazelensin
+    try {
+      chrome.storage.onChanged.addListener((degisim, alan) => {
+        if (alan === 'local' && 'web-not-store' in degisim) tazele();
+      });
+    } catch (e) { /* yut */ }
   })();
 })();

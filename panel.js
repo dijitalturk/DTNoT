@@ -1,5 +1,7 @@
 /* DTNoT — Notlarım paneli: site bazlı gruplar, arama, satır içi düzenleme/silme/açma.
-   Satır listesi (kart ızgarası değil), tek tip tasarım. */
+   Satır listesi (kart ızgarası değil), tek tip tasarım. Şema v2: aynı sayfada birden
+   çok not olabilir; her satır KİMLİK (id) ile işlem görür. Düzenleme görünümü
+   (post-it · banner · footer · etiket) ve site geneli bağımsız işaretlenir. */
 (function () {
   'use strict';
 
@@ -7,13 +9,14 @@
   const I = globalThis.DTNOT_I18N;
   const T = (k, v) => I.t(k, v);
   const $ = (id) => document.getElementById(id);
+  const gorunumAdi = (k) => T('gorunum.' + ((S.gorunumOf ? S.gorunumOf(k) : k.gorunum) || 'postit'));
 
   let notlar = [];
   let arama = '';
   let sadeceAktif = false;
   let aktifHost = '';
   let renkFiltre = 'tumu';
-  let duzenlenen = null; // anahtar
+  let duzenlenen = null; // not id
   let mesaj = { metin: '', tur: '' };
 
   async function cagri(tip, veri) {
@@ -90,6 +93,26 @@
     return b;
   }
 
+  /** Satır içi düzenlemede görünüm seçici (4 görünüm, tek kaynak S.GORUNUMLER). */
+  function gorunumSeciciCiz(kap, yerel) {
+    const dugmeler = [];
+    (S.GORUNUMLER || ['postit']).forEach((g) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'tur-dugme';
+      b.dataset.gorunum = g;
+      b.setAttribute('aria-pressed', String(yerel.gorunum === g));
+      b.title = T('gorunum.' + g);
+      b.textContent = T('gorunum.' + g);
+      b.addEventListener('click', () => {
+        yerel.gorunum = g;
+        dugmeler.forEach((d) => d.setAttribute('aria-pressed', String(d.dataset.gorunum === g)));
+      });
+      dugmeler.push(b);
+      kap.appendChild(b);
+    });
+  }
+
   function notSatiri(k) {
     const satir = document.createElement('div');
     satir.className = 'not-satir';
@@ -107,21 +130,29 @@
     yol.title = k.anahtar;
     yol.textContent = S.kisaltOrtadan(k.yol, 58);
     ust.appendChild(yol);
-    if (k.banner === true) {
+    const gb = document.createElement('span');
+    gb.className = 'pill pill--soluk';
+    gb.textContent = gorunumAdi(k);
+    ust.appendChild(gb);
+    if (k.siteGeneli === true) {
       const rb = document.createElement('span');
       rb.className = 'pill pill--warn';
-      rb.textContent = k.siteGeneli === true ? 'BANNER · SITE' : 'BANNER';
+      rb.textContent = T('panel.siteGeneliRozet');
       ust.appendChild(rb);
     }
     sol.appendChild(ust);
 
-    if (duzenlenen === k.anahtar) {
+    if (duzenlenen === k.id) {
       const alan = document.createElement('textarea');
       alan.className = 'girdi mt-1';
       alan.value = k.metin;
       sol.appendChild(alan);
 
-      const yerel = { renk: k.renk || 'sari', banner: k.banner === true, siteGeneli: k.siteGeneli === true };
+      const yerel = {
+        renk: k.renk || 'sari',
+        gorunum: (S.gorunumOf ? S.gorunumOf(k) : k.gorunum) || 'postit',
+        siteGeneli: k.siteGeneli === true,
+      };
 
       const satirRenk = document.createElement('div');
       satirRenk.className = 'toolbar mt-2';
@@ -149,23 +180,23 @@
       satirRenk.appendChild(renkKap);
       sol.appendChild(satirRenk);
 
-      const kutuBanner = document.createElement('label');
-      kutuBanner.className = 'onay';
-      const chkBanner = document.createElement('input');
-      chkBanner.type = 'checkbox';
-      chkBanner.checked = yerel.banner;
-      const spBanner = document.createElement('span');
-      spBanner.textContent = T('not.banner');
-      kutuBanner.appendChild(chkBanner);
-      kutuBanner.appendChild(spBanner);
-      sol.appendChild(kutuBanner);
+      const satirGorunum = document.createElement('div');
+      satirGorunum.className = 'toolbar mt-2';
+      const etiketGorunum = document.createElement('span');
+      etiketGorunum.className = 'etiket';
+      etiketGorunum.textContent = T('not.gorunum');
+      satirGorunum.appendChild(etiketGorunum);
+      const gorunumKap = document.createElement('div');
+      gorunumKap.className = 'tur-sec';
+      gorunumSeciciCiz(gorunumKap, yerel);
+      satirGorunum.appendChild(gorunumKap);
+      sol.appendChild(satirGorunum);
 
       const kutuSite = document.createElement('label');
       kutuSite.className = 'onay';
       const chkSite = document.createElement('input');
       chkSite.type = 'checkbox';
       chkSite.checked = yerel.siteGeneli;
-      chkSite.disabled = !yerel.banner;
       const spSite = document.createElement('span');
       spSite.textContent = T('not.siteGeneli');
       kutuSite.appendChild(chkSite);
@@ -177,11 +208,6 @@
       ipucuSite.textContent = T('not.siteGeneliNot');
       sol.appendChild(ipucuSite);
 
-      chkBanner.addEventListener('change', () => {
-        yerel.banner = chkBanner.checked;
-        chkSite.disabled = !yerel.banner;
-        if (!yerel.banner) { chkSite.checked = false; yerel.siteGeneli = false; }
-      });
       chkSite.addEventListener('change', () => { yerel.siteGeneli = chkSite.checked; });
 
       const alt = document.createElement('div');
@@ -189,11 +215,11 @@
       alt.appendChild(dugme(T('ortak.kaydet'), 'btn--kaydet', async () => {
         if (!alan.value.trim()) { mesaj = { metin: T('popup.metinGerekli'), tur: 'hata' }; bildir(); return; }
         const r = await cagri('NOT_GUNCELLE', {
-          anahtar: k.anahtar,
+          id: k.id,
           patch: {
             metin: alan.value,
             renk: yerel.renk,
-            banner: yerel.banner,
+            gorunum: yerel.gorunum,
             siteGeneli: yerel.siteGeneli,
             kucuk: false,
             gizleUntil: 0,
@@ -226,13 +252,13 @@
     t.textContent = T('panel.sonGuncelleme') + ': ' + tarih(k.guncelleme);
     alt.appendChild(t);
     alt.appendChild(dugme(T('panel.sayfaAc'), 'btn--kucuk', async () => {
-      const r = await cagri('SAYFA_AC', { anahtar: k.anahtar });
+      const r = await cagri('SAYFA_AC', { id: k.id });
       if (!r || !r.ok) { mesaj = { metin: T('popup.kaydetHata'), tur: 'hata' }; bildir(); }
     }));
-    alt.appendChild(dugme(T('ortak.duzenle'), 'btn--kucuk', () => { duzenlenen = k.anahtar; ciz(); }));
+    alt.appendChild(dugme(T('ortak.duzenle'), 'btn--kucuk', () => { duzenlenen = k.id; ciz(); }));
     alt.appendChild(dugme(T('ortak.sil'), 'btn--danger btn--kucuk', async () => {
       if (!window.confirm(T('ortak.silOnay'))) return;
-      const r = await cagri('NOT_SIL', { anahtar: k.anahtar });
+      const r = await cagri('NOT_SIL', { id: k.id });
       mesaj = r ? { metin: T('popup.silindi'), tur: 'tamam' } : { metin: T('popup.kaydetHata'), tur: 'hata' };
       await yukle();
     }));

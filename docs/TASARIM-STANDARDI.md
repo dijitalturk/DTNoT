@@ -68,6 +68,8 @@ renksiz `border` koyu temada doğru görünür.
 | `.etiket` `.ipucu` `.bolum-baslik` `.durum` | küçük tipografi |
 | `.diller` `.dil-dugme` | TR/EN bayrak düğmeleri (test-kilitli adlar; yalnız **popup** ve **panel** üst barında) |
 | `.renkler` `.renk-sec` `.renk-nokta` `.renk-secili` | post-it renk seçici (bölüm 6) |
+| `.tur-sec` `.tur-dugme` (`aria-pressed`) | **görünüm seçici**: Post-it · Banner · Footer · Etiket (tek kaynak `store.GORUNUMLER`) |
+| `.not-kart` `.not-kart__ust` `.not-kart__metin` `.not-kart__yol` | popup "Bu sayfadaki notlar" kartları |
 | `.grup` `.grup-bas` `.not-satir` `.not-yol` `.not-metin` `.not-alt` `.not-tarih` | Notlarım liste satırları |
 | `.kv-liste` `.kv` | anahtar/değer satırı (Ayarlar → Hakkında) |
 | `.truncate` `.min-w-0` `.flex-1` `.flex-wrap` `.mt-1/2/3` `.mb-2` | **yalnız yerleşim** yardımcıları (renk yok) |
@@ -191,7 +193,7 @@ renkleri yine `PALET` verisinden alır.
 ## 8. Doğrulama (her değişiklikten sonra)
 
 ```bash
-node tests/dtnot-test.mjs     # 86 test: depo mantığı + i18n + mesajlaşma + manifest/paket kilidi + tema + popup Ayarlar görünümü
+node tests/dtnot-test.mjs     # 105 test: depo mantığı + i18n + mesajlaşma + manifest/paket kilidi + görünüm/sayfa + tema + popup
 python3 build.py              # 4 çıktı: zip (Firefox/Zen), xpi, chrome zip, dist/chrome-unpacked
 ```
 
@@ -208,7 +210,32 @@ i18n anahtarının sözlükte olması, TR/EN anahtar kümelerinin ve `_locales`
 sözlüklerinin eşitliği. Sınıf adı değiştirirken bu kilitleri kırmayın; yeni sınıf
 eklerken önce standart sözlüğe bakın.
 
-## 9. Dosya haritası
+## 9. Sayfa üstü görünümler (post-it · banner · footer · etiket)
+
+Sayfa üstü katman `content.js` içinde **tek gölge kök** (`#dtnot-kok`) altında çizilir;
+renkler yine `PALET` verisinden gelir. Görünüm listesi **tek kaynak**: `store.GORUNUMLER`.
+
+| Görünüm | Yerleşim | Notlar |
+|---|---|---|
+| `postit` | `position: fixed`, sürüklenebilir (`.kutu`) | konum pencere oranı olarak saklanır; sağ altında `DijitalTurk.com` bağlantısı (`.marka`, 10px) |
+| `banner` | `.bannerlar` (fixed, en tepede) | sayfa `padding-top` ile aşağı ittirilir (`ResizeObserver` ile ölçülür) |
+| `footer` | `.footerlar` (fixed, en altta) | sayfa `padding-bottom` ile ittirilir (içeriği örtmez) |
+| `etiket` | `.kose` (fixed, sağ alt, `overflow:hidden`) | `.kose__serit` 45° döndürülür: bir ucu alt kenara, bir ucu sağ kenara dayanır |
+
+Kurallar:
+
+- **`hidden` gölge kökte AÇIKÇA verilir** (`[hidden] { display:none !important }`): `.menu` / `.duzen`
+  `display` tanımladığı için tarayıcının UA `[hidden]` kuralını yener; kural yoksa menü ve düzenleyici
+  "gizliyken" görünür kalır ve banner yüksekliği şişer (gerçek Chromium'da ölçüldü).
+- Her görünümde **✎ (menü)** ve **× (gizle)** vardır; ✎ `Düzenle` / `Sil` menüsünü açar. Düzenleme
+  **yerinde** yapılır (metin + renk + görünüm + site geneli) — ayrı ekran açılmaz.
+- `kucuk` (küçültme) YALNIZ post-it görünümünde anlamlıdır; başka görünüme geçen notta sıfırlanır.
+- Yeniden çizim **imzaya** bağlıdır ve imza `konum`u DIŞLAR: sürükleme sırasında depo değişimi kartı
+  yerinden zıplatmasın.
+- Yeni görünüm eklerken: `GORUNUMLER` + `gorunum.*` i18n anahtarları (TR/EN) + `ciz*` fonksiyonu +
+  testte nöbetçi vaka **birlikte** güncellenir.
+
+## 10. Dosya haritası
 
 | Dosya | Rol |
 |---|---|
@@ -219,4 +246,4 @@ eklerken önce standart sözlüğe bakın.
 | `popup.html` / `popup.js` | popup ekranı (448px): **not görünümü** + **popup içi Ayarlar görünümü** (katlanır bölümler) |
 | `panel.html` / `panel.js` | Notlarım ekranı (liste, arama, renk filtresi) |
 | `options.html` / `options.js` | Ayarlar ekranı (katlanır bölümler, tema, yedekleme) |
-| `content.js` | sayfa üstü post-it/banner (gölge DOM, host sayfa) |
+| `content.js` | sayfa üstü **post-it · banner · footer · etiket** (gölge DOM, host sayfa) + ✎ menüsü/yerinde düzenleyici |

@@ -23,8 +23,8 @@
 
     <div id="bildirim" class="durum" role="status" aria-live="polite"></div>
 
-    <!-- NOT GÖRÜNÜMÜ (varsayılan): yalnız not işlemleri. ⚙ Ayarlar açıkken
-         tümü gizlenir — Ayarlar görünümünde not ekleme/liste alanı OLMAZ. -->
+    <!-- NOT GÖRÜNÜMÜ (varsayılan): sayfa bilgisi → Not ekle (ÜSTTE) → bu sayfadaki notlar.
+         Ayarlar açıkken tümü gizlenir — Ayarlar görünümünde not ekleme/liste alanı OLMAZ. -->
     <div id="notGorunum" class="yigin">
       <section id="izinKutu" class="panel panel--uyari yigin" hidden>
         <b id="izinBaslik"></b>
@@ -36,34 +36,42 @@
 
       <section class="panel yigin">
         <div class="toolbar">
-          <span id="notRenk" class="renk-nokta" hidden></span>
           <span class="etiket" id="sayfaEtiket">Bu sayfa</span>
-          <span id="bannerRozet" class="pill pill--warn" hidden>BANNER</span>
           <div class="toolbar__sag">
             <span id="canliRozet" class="pill pill--ok" hidden>✓</span>
-            <button type="button" id="silDugme" class="btn btn--pill btn--danger" hidden>Sil</button>
           </div>
         </div>
         <p id="sayfaAdres" class="ipucu truncate" title="">…</p>
 
+        <!-- NOT EKLE — her zaman not listesinin ÜSTÜNDE durur. -->
         <button type="button" id="ekleAc" class="btn btn--primary">Not ekle</button>
 
         <div id="ekleKutu" class="yigin" hidden>
+          <p class="ipucu" id="formBaslik"></p>
           <textarea id="metin" class="girdi" maxlength="4000"></textarea>
           <div class="toolbar">
             <span class="etiket" id="renkEtiket"></span>
             <div id="renkler" class="renkler" role="group"></div>
             <span id="renkSecili" class="renk-secili"></span>
           </div>
-          <label class="onay"><input type="checkbox" id="bannerChk" /> <span id="bannerEtiket"></span></label>
-          <p class="ipucu" id="bannerNotu"></p>
-          <label class="onay"><input type="checkbox" id="siteGeneliChk" disabled /> <span id="siteGeneliEtiket"></span></label>
+          <div class="toolbar">
+            <span class="etiket" id="gorunumEtiket"></span>
+            <div id="gorunumSec" class="tur-sec" role="group"></div>
+          </div>
+          <label class="onay"><input type="checkbox" id="siteGeneliChk" /> <span id="siteGeneliEtiket"></span></label>
           <p class="ipucu" id="siteGeneliNotu"></p>
           <button type="button" id="kaydet" class="btn btn--primary">Kaydet</button>
           <button type="button" id="vazgec" class="btn">Vazgeç</button>
         </div>
 
-        <p id="notOnizleme" class="ipucu" hidden></p>
+        <div class="toolbar">
+          <h2 id="sayfaNotBaslik" class="bolum-baslik">Bu sayfadaki notlar</h2>
+          <div class="toolbar__sag">
+            <span id="sayfaNotSayi" class="pill pill--soluk">0</span>
+          </div>
+        </div>
+        <div id="sayfaNotlar" class="yigin"></div>
+        <p class="ipucu" id="sayfaNotYok" hidden></p>
       </section>
 
       <section class="panel yigin">
