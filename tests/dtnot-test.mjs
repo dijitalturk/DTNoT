@@ -553,7 +553,7 @@ await test('content.js: sürükle-bırak konum kaydediyor (oran olarak)', () => 
   assert.match(contentKod, /pointerdown/);
   assert.match(contentKod, /pointermove/);
   assert.match(contentKod, /konum: oran/, 'konum kaydedilmiyor');
-  assert.match(contentKod, /innerWidth - r\.width/, 'konum oranı yanlış hesaplanıyor');
+  assert.match(contentKod, /function konumOrani[\s\S]{0,260}?window\.innerWidth - w/, 'konum oranı pencere genişliğine göre hesaplanmıyor');
 });
 await test('content.js: banner sayfayı aşağı ittiriyor (üstüne binmiyor)', () => {
   assert.match(contentKod, /function sayfaIttir/, 'sayfaIttir yok');
@@ -984,6 +984,38 @@ await test('store: tek kaynak görünüm listesi + marka bağlantısı', () => {
   assert.equal(S.SAYFA_LINK, 'https://dijitalturk.com');
   assert.equal(S.STORE_VERSION, 2);
   assert.match(contentKod, /S\.SAYFA_LINK|\(S && S\.SAYFA_LINK\)/, 'content.js marka bağlantısını depodan almıyor');
+});
+await test('content.js: çakışma önleme — yerBul + eskidenYeniye', () => {
+  assert.match(contentKod, /function yerBul/, 'yerBul yok');
+  assert.match(contentKod, /function kutuCakisir/, 'kutuCakisir yok');
+  assert.match(contentKod, /function eskidenYeniye/, 'eskidenYeniye yok');
+  assert.match(contentKod, /const ARALIK = 10/, 'notlar arası boşluk tanımlı değil');
+  // Yer tercihi sırası: SAĞ → ALT → ÜST → SOL (kullanıcı: "mevcudun sağına eklensin")
+  const sag = contentKod.indexOf('// SAĞI');
+  const alt = contentKod.indexOf('// ALTI');
+  const ust = contentKod.indexOf('// ÜSTÜ');
+  assert.ok(sag > 0 && alt > sag && ust > alt, 'yer tercihi sırası yanlış (önce SAĞ olmalı)');
+});
+await test('content.js: post-it yerleşimi ve sürükleme bırakışı çakışmayı çözer', () => {
+  assert.match(contentKod, /yerBul\(kapliBolge\.concat\(yerlesim\)/, 'çizimde çakışma çözümü yok');
+  assert.match(contentKod, /const digerleri = yerlesim\.filter\(\(b\) => b\.id !== not\.id\)\.concat\(kapliBolge\)/, 'sürüklemede çakışma çözümü yok');
+  assert.match(contentKod, /yerlesim\.push\(kutuYap\(/, 'yerleşim kaydı tutulmuyor');
+  assert.match(contentKod, /function konumOrani[\s\S]{0,260}?window\.innerWidth - w/, 'konum oranı pencere genişliğine göre hesaplanmıyor');
+  assert.ok(!/konumUygula/.test(contentKod), 'eski konumUygula kalmış');
+});
+await test('content.js: şerit sırası — banner/footer yeni not ALTTA, etiket ÜSTTE', () => {
+  assert.match(contentKod, /eskidenYeniye\(veri\.banner\)/, 'banner eskiden yeniye sıralanmıyor');
+  assert.match(contentKod, /eskidenYeniye\(veri\.footer\)/, 'footer eskiden yeniye sıralanmıyor');
+  assert.match(contentKod, /eskidenYeniye\(veri\.etiket\)/, 'etiket eskiden yeniye sıralanmıyor');
+  assert.match(contentKod, /cizEtiket\(n, kap, i, sirali\.length, altYuksek\)/, 'etikete sıra/boşluk bilgisi verilmiyor');
+  assert.match(contentKod, /const KOSE_ADIM = 68/, 'etiket aralığı tanımlı değil');
+  assert.match(contentKod, /const d = KOSE \+ Math\.max\(0, sira\) \* KOSE_ADIM/, 'etiket konumu sıraya bağlı değil');
+  assert.match(contentKod, /kose\.style\.bottom = Math\.round\(Math\.max\(0, Number\(altBosluk\) \|\| 0\)\) \+ 'px'/, 'etiket footer üstüne oturmuyor (çakışır)');
+});
+await test('content.js: etiket menü/düzenleyici kutusu NOTUN RENGİYLE açılır (saydam değil)', () => {
+  assert.match(contentKod, /\.kose__menu \{ position: fixed;[\s\S]{0,260}?background: var\(--bg\)/, 'etiket menü kutusunun arka planı yok (saydam kalır)');
+  assert.ok(/\.kose__menu \{ position: fixed;[\s\S]{0,260}?border-radius: 12px/.test(contentKod), 'menü kutusu kart görünümünde değil');
+  assert.match(contentKod, /disKap\.hidden = duzenKap\.hidden && menu\.menu\.hidden/, 'boş menü kutusu gizlenmiyor');
 });
 await test('uyumluluk: eski API adları kaldırıldı (sayfaNotu/bannerNotu yok)', () => {
   assert.ok(!('sayfaNotu' in S), 'sayfaNotu hâlâ dışa aktarılıyor');
