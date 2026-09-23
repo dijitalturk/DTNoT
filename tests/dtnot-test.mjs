@@ -697,5 +697,19 @@ await test('tema: ui.css açık tema bloğu (tokenlar + color-scheme) ve okunurl
   assert.match(css, /html\.db-acik \.ikon-dugme:hover/, 'açık temada ikon düğmesi hover zemini düzeltilmemiş');
 });
 
+await test('sayfa betiklerinin aradığı her id kendi HTML’inde var (kopuk bağ yok)', () => {
+  const ciftler = [['popup.html', 'popup.js'], ['panel.html', 'panel.js'], ['options.html', 'options.js']];
+  const eksikler = [];
+  ciftler.forEach(([html, js]) => {
+    const kod = oku(js);
+    const htmlMetni = oku(html);
+    const idler = new Set((kod.match(/\$\('([a-zA-Z0-9_-]+)'\)/g) || []).map((s) => s.slice(3, -2)));
+    idler.forEach((id) => {
+      if (!htmlMetni.includes('id="' + id + '"')) eksikler.push(js + ' → #' + id);
+    });
+  });
+  assert.deepEqual(eksikler, [], 'HTML’de olmayan id çağrılıyor: ' + eksikler.join(', '));
+});
+
 console.log(`\nSONUÇ: ${gecen} geçti, ${kalan} kaldı`);
 process.exit(kalan ? 1 : 0);

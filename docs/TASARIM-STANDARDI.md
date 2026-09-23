@@ -181,7 +181,7 @@ renkleri yine `PALET` verisinden alır.
 ## 8. Doğrulama (her değişiklikten sonra)
 
 ```bash
-node tests/dtnot-test.mjs     # 80 test: depo mantığı + i18n + mesajlaşma + manifest/paket kilidi + tema
+node tests/dtnot-test.mjs     # 81 test: depo mantığı + i18n + mesajlaşma + manifest/paket kilidi + tema
 python3 build.py              # 4 çıktı: zip (Firefox/Zen), xpi, chrome zip, dist/chrome-unpacked
 ```
 
