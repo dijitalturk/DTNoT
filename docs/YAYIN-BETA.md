@@ -125,7 +125,39 @@ Teknik notlar:
 Ortak gerekenler: mağaza metinleri (yukarıda), 3 ekran görüntüsü, 128 ikon, gizlilik/veri beyanı
 ("veri toplamıyoruz"), izin gerekçeleri.
 
-## 7) Kullanıcının kendi tarayıcısında 1 dakikalık QA (yayın öncesi)
+## 8) AMO'ya LİSTELENMİŞ (public) yükleme — adım adım
+
+Karar: **AMO'da herkese açık listeleme** (beta için ayrı kanal yok; sürüm yüklendiğinde mağaza
+sayfası yayında olur). Teknik kapı temiz: `web-ext lint` → **0 hata / 0 uyarı**.
+
+1. `https://addons.mozilla.org/tr/developers/` → Firefox Hesabınla giriş yap.
+2. **Submit a New Add-on** → *Continue*.
+3. **Upload**: `dist/dtnot-0.3.2.zip` (Firefox paketi; `chrome.zip` DEĞİL).
+   AMO otomatik doğrular ve sürümü `0.3.2` olarak algılar.
+4. **Distribute**: *On this site* (listelenmiş) seç.
+5. Sürüm alanları:
+   - **Release notes (sürüm notları):** `docs/YAYIN-BETA.md` §4 (kopyala-yapıştır).
+   - **Notes to Reviewer:** §5 (kopyala-yapıştır) — "ağ isteği yok, test hesabı gerekmez" vurgusu var.
+6. Mağaza kaydı (listing) alanları:
+   - **Name:** DTNoT — Sayfalara not bırak · **Summary:** §1 kısa açıklama
+   - **Description:** §1 uzun açıklama (TR) — istersen §2 EN metnini de ekle (çok dilli kayıt)
+   - **Category:** Productivity · **Dil:** Türkçe (+İngilizce)
+   - **License:** (kullanıcı seçecek) MIT ya da *All Rights Reserved*
+   - **Support site:** `https://dijitalturk.com` · **Support email:** (kullanıcı verecek)
+   - **Privacy policy:** "Bu eklenti hiçbir veri toplamaz, saklamaz ve iletmez. Notlar yalnız
+     kullanıcının tarayıcı deposunda tutulur." + istersen `https://dijitalturk.com` bağlantısı
+   - **Screenshots:** `dist/magaza-popup.png`, `dist/magaza-icerik.png`, `dist/magaza-panel.png`
+     (hepsi 1280×800 — AMO'nun istediği ölçü)
+7. **Submit version** → Mozilla incelemesi (otomatik + insan). Onaylanınca mağaza sayfası yayına
+   girer; yeni sürümlerde aynı "Upload" akışıyla `0.3.3`, `0.3.4`… yükseltilir.
+
+Notlar:
+- Kaynak kodu göndermek GEREKMEZ (minify/bundle/eval yok; paket = kaynak).
+- `data_collection_permissions.required = ["none"]` beyanı manifestte — AMO'nun "veri toplama"
+  sorusuyla tutarlı.
+- Yeni sürüm yüklerken sürüm numarasını ARTIR (aynı numarayı tarayıcı yeni derleme saymaz).
+
+## 9) Kullanıcının kendi tarayıcısında 1 dakikalık QA (yayın öncesi)
 
 1. **Zen/Firefox:** `about:debugging#/runtime/this-firefox` → Geçici Eklenti Yükle → `dtnot-0.3.2.zip`
    → popup'ı aç, bir sayfaya 2 post-it + 1 banner + 1 etiket ekle, ✎ menülerini dene.
