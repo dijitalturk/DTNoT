@@ -120,6 +120,34 @@ Technical notes:
 
 ---
 
+## 3b) Privacy sayfası cevapları (Edge)
+
+**Eklentinin amacı (purpose):**
+```
+Create and manage personal notes on web pages: sticky notes, banners, footers and corner tags.
+All data stays on the user's device; there is no account, no server and no network request.
+```
+
+**İzin gerekçeleri (permission justifications):**
+```
+storage — Notes and settings are stored locally in the browser.
+activeTab — Reads the current tab's address only when the user adds a note from the popup.
+scripting — Registers the optional in-page note layer at runtime, after the user grants permission.
+contextMenus — Adds a right-click "Add note" menu entry.
+optional host permission (*://*/*) — Requested at RUNTIME (not at install) to draw notes over the pages the user chooses.
+```
+
+**Uzaktan kod (remote code):** `No` — no remote code, no eval, no bundling.
+
+**Veri beyanı (data usage):**
+```
+DTNoT does not collect, store, or transmit any personal data. There is no account, no server and no
+network request of any kind. Notes and settings are stored only in the user's own browser storage.
+The content script only draws notes into the DOM; it does not read or transmit page content.
+```
+
+---
+
 ## 4) Sonrası
 
 - Güncelleme: `manifest.json` sürümünü artır → `python3 build.py` → yeni `-chrome.zip` → **Packages → Upload** → Submit.
