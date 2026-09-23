@@ -513,6 +513,15 @@ await test('popup: “Yeni sayfada aç” bağlantısı openOptionsPage + tabs.c
   assert.match(kod, /tabs\.create\(\{ url: rt\.getURL\('options\.html'\) \}\)/, 'tabs.create yedeği yok');
   assert.match(kod, /\$\('yeniSayfadaAc'\)\.addEventListener\('click',[\s\S]{0,140}e\.preventDefault\(\)/, 'bağlantı varsayılan davranışa bırakılmış (çift sekme riski)');
 });
+await test('Ayarlar: DİL bölümü/seçici kaldırıldı (i18n altyapısı durur)', () => {
+  const html = oku('options.html');
+  const kod = oku('options.js');
+  assert.ok(!/govdeDil|baslikDil|ozetDil|dilSatir/.test(html), 'options.html içinde Dil bölümü kalmış');
+  assert.ok(!/baslikDil|ozetDil|dilNot|dilSatir/.test(kod), 'options.js hâlâ Dil bölümünü dolduruyor');
+  assert.match(kod, /I\.hazirla\(\)/, 'i18n altyapısı (hazirla) kaldırılmış');
+  assert.match(oku('assets/i18n.js'), /'ayar\.dil'/, 'i18n sözlüğü korunmalı');
+  assert.match(oku('assets/i18n.js'), /'ayar\.dilNot'/, 'i18n sözlüğü korunmalı');
+});
 await test('content.js: banner sayfayı aşağı ittiriyor (üstüne binmiyor)', () => {
   const kod = oku('content.js');
   assert.match(kod, /function sayfaIttir/, 'sayfaIttir yok');

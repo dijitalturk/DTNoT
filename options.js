@@ -1,4 +1,6 @@
-/* DTNoT — Ayarlar: dil, gizleme süresi, panel davranışı, JSON yedekleme/geri yükleme.
+/* DTNoT — Ayarlar: gizleme süresi, panel davranışı, JSON yedekleme/geri yükleme.
+   Dil seçici bu ekrandan KALDIRILDI (dil popup'taki TR/EN bayraklarıyla değişir);
+   i18n altyapısı (assets/i18n.js + _locales) aynen durur.
    İçe/dışa aktarma BİLİNÇLİ olarak buradadır: popup kapanınca dosya seçici iptal olabilir. */
 (function () {
   'use strict';
@@ -31,8 +33,6 @@
   function etiketle() {
     document.title = 'DTNoT — ' + T('ayar.baslik');
     $('altBaslik').textContent = T('ayar.baslik');
-    $('baslikDil').textContent = T('ayar.dil');
-    $('dilNot').textContent = T('ayar.dilNot');
     $('baslikDavranis').textContent = T('ayar.davranis');
     $('gizlemeEtiket').textContent = T('ayar.gizlemeSuresi');
     $('gizlemeNot').textContent = T('ayar.gizlemeNot');
@@ -100,7 +100,6 @@
   /** Bölüm başlıklarındaki TEK satırlık özetler: kapalıyken de bilgi görünür kalır. */
   function ozetYaz() {
     const a = durum.ayarlar || {};
-    $('ozetDil').textContent = I.dil().toUpperCase();
     $('ozetDavranis').textContent = T(saatAnahtar(a.gizlemeSaat || 1));
     $('ozetVeri').textContent = T('panel.toplam', { n: durum.sayi });
     try { $('ozetHakkinda').textContent = T('ayar.surum', { 0: chrome.runtime.getManifest().version }); }
