@@ -711,5 +711,111 @@ await test('sayfa betiklerinin aradığı her id kendi HTML’inde var (kopuk ba
   assert.deepEqual(eksikler, [], 'HTML’de olmayan id çağrılıyor: ' + eksikler.join(', '));
 });
 
+/* ================= 11) Popup Ayarlar görünümü (katlanır bölümler) ================= */
+console.log('\n11) Popup Ayarlar görünümü');
+
+const popupHtml = oku('popup.html');
+const popupKod = oku('popup.js');
+
+/** Ayarlar görünümü = popup.html içinde AYARLAR-BASLANGIC … AYARLAR-BITIS arası.
+    (Popup'ın iki görünümü: not işlemleri · Ayarlar.) */
+function ayarBloguAl() {
+  const bas = popupHtml.indexOf('<!-- AYARLAR-BASLANGIC');
+  const son = popupHtml.indexOf('<!-- AYARLAR-BITIS');
+  return (bas !== -1 && son > bas) ? popupHtml.slice(bas, son) : '';
+}
+const ayarBlogu = ayarBloguAl();
+
+await test('popup Ayarlar: not ekleme/liste alanları YOK (notlar Notlarım ekranında)', () => {
+  assert.ok(ayarBlogu.length > 300, 'Ayarlar görünümü işaretleri (AYARLAR-BASLANGIC/BITIS) bulunamadı');
+  ['ekleAc', 'ekleKutu', 'metin', 'renkler', 'renkSecili', 'renkEtiket', 'bannerChk', 'siteGeneliChk',
+    'kaydet', 'vazgec', 'silDugme', 'notOnizleme', 'havuzBaslik', 'havuzNotu', 'panelDugme',
+    'toplamRozet', 'sayfaAdres'].forEach((id) => {
+    assert.ok(ayarBlogu.indexOf('id="' + id + '"') === -1, 'popup Ayarlar içinde not alanı var: #' + id);
+  });
+  // Not alanları SİLİNMEDİ: popup'ın normal (not) görünümünde duruyorlar
+  ['ekleAc', 'metin', 'havuzBaslik', 'panelDugme', 'renkSecili'].forEach((id) => {
+    assert.ok(popupHtml.indexOf('id="' + id + '"') !== -1, 'not alanı tamamen kayboldu: #' + id);
+  });
+  // Ayarlar açıkken not görünümü tümüyle gizlenir: notlar panel.html'de yönetilir
+  assert.match(popupHtml, /id="notGorunum"/, 'not görünümü sarmalayıcısı yok');
+  assert.match(popupKod, /async function ayarModu[\s\S]{0,400}\$\('notGorunum'\)\.hidden = !!ac/,
+    'Ayarlar açılınca not görünümü gizlenmiyor');
+});
+
+await test('popup Ayarlar: bölümler katlanır, varsayılanlar options ile AYNI', () => {
+  const bolumBul = (html, kontrol) => {
+    const re = new RegExp('<section[^>]*data-acik="(true|false)"[^>]*>\\s*<button[^>]*aria-expanded="(true|false)"[^>]*aria-controls="' + kontrol + '"');
+    const m = html.match(re);
+    return m ? { acik: m[1], aria: m[2] } : null;
+  };
+  ['govdeDavranis', 'govdeVeri', 'govdeHakkinda'].forEach((k) => {
+    const o = bolumBul(oku('options.html'), k);
+    const p = bolumBul(ayarBlogu, k);
+    assert.ok(o, 'options.html: ' + k + ' katlanır bölümü yok');
+    assert.ok(p, 'popup.html: ' + k + ' katlanır bölümü yok (Ayarlar options ile aynı bölümleri göstermeli)');
+    assert.equal(p.acik, o.acik, 'varsayılan options ile aynı değil: ' + k);
+    assert.equal(p.aria, o.aria, 'aria-expanded tutarsız: ' + k);
+  });
+  // Gövdeler DOM'da kalır, yalnız `hidden` ile gizlenir (arama/otomasyon bozulmaz)
+  ['govdeDavranis', 'govdeHakkinda'].forEach((id) => {
+    assert.match(ayarBlogu, new RegExp('id="' + id + '"'), id + ' gövdesi yok');
+  });
+  assert.match(ayarBlogu, /id="govdeVeri" hidden/, 'kapalı Veri gövdesi hidden değil');
+  assert.match(ayarBlogu, /class="katlanir__ok" aria-hidden="true">▸/, 'kapalı bölüm ok işareti ▸ değil');
+  assert.match(ayarBlogu, /class="katlanir__ok" aria-hidden="true">▾/, 'açık bölüm ok işareti ▾ değil');
+  // Davranış kodu: options.js ile AYNI .katlanir sözleşmesi
+  assert.match(popupKod, /uygula\(bolum\.dataset\.acik !== 'false'\)/, 'varsayılan data-acik üzerinden kurulmuyor');
+  assert.match(popupKod, /baslik\.setAttribute\('aria-expanded', String\(acik\)\)/, 'aria-expanded güncellenmiyor');
+  assert.match(popupKod, /govde\.hidden = !acik/, 'gövde hidden ile gizlenmiyor');
+  assert.match(popupKod, /ok\.textContent = acik \? '▾' : '▸'/, 'ok göstergesi çevrilmiyor');
+  // Başlıkta TEK satırlık özet (kapalıyken de bilgi görünür)
+  ['ozetDavranis', 'ozetVeri', 'ozetHakkinda'].forEach((id) => {
+    assert.ok(ayarBlogu.indexOf('class="katlanir__ozet" id="' + id + '"') !== -1, 'bölüm özeti yok: #' + id);
+  });
+  assert.match(popupKod, /ozetDavranis\.textContent = T\(saatAnahtar\(/, 'Davranış özeti (gizleme süresi) yazılmıyor');
+  assert.match(popupKod, /ozetVeri\.textContent = T\('panel\.toplam'/, 'Veri özeti (not sayısı) yazılmıyor');
+  assert.match(popupKod, /ozetHakkinda\.textContent = T\('ayar\.surum'/, 'Hakkında özeti (sürüm) yazılmıyor');
+});
+
+await test('popup Ayarlar: ✕ kapatma düğmesi KALDIRILDI (kapanma yine ⚙ ile)', () => {
+  assert.ok(popupHtml.indexOf('ayarKapat') === -1, 'popup.html içinde ✕ düğmesi kaldı');
+  assert.ok(popupKod.indexOf('ayarKapat') === -1, 'popup.js hâlâ ✕ düğmesini bağlıyor');
+  assert.ok(!/>\s*✕\s*</.test(popupHtml), 'popup.html içinde ✕ düğmesi kaldı');
+  assert.match(popupKod, /\$\('ayarAc'\)\.addEventListener\('click', \(\) => ayarModu\(/,
+    'Ayarlar ⚙ düğmesiyle açılıp kapanmıyor');
+  assert.match(popupKod, /async function ayarModu[\s\S]{0,400}\$\('ayarAc'\)\.setAttribute\('aria-pressed', String\(!!ac\)\)/,
+    '⚙ düğmesi etkin durumu (aria-pressed) bildirmiyor');
+});
+
+await test('popup Ayarlar: tema seçici Ayarlar içinde + ORTAK render yolundan', () => {
+  const davranis = ayarBlogu.match(/id="govdeDavranis"[\s\S]*?<\/div>\s*<\/section>/);
+  assert.ok(davranis, 'Davranış bölümü gövdesi bulunamadı');
+  assert.match(davranis[0], /id="tema" class="secici"/, 'tema seçicisi Davranış bölümünde değil');
+  assert.match(davranis[0], /id="temaEtiket"/, 'tema etiketi yok');
+  assert.match(popupKod, /TM\.seciciKur\(\$\('tema'\)/, 'tema seçici ortak yoldan (assets/tema.js) kurulmuyor');
+  assert.ok(!/style=/.test(ayarBlogu), 'Ayarlar görünümünde gömülü stil (style=) var');
+});
+
+await test('popup Ayarlar: “Sayfada göster” linki EN ALTTA + openOptionsPage', () => {
+  assert.match(ayarBlogu, /id="yeniSayfadaAc" class="altbilgi__link"/, 'standart .altbilgi__link sınıfı yok');
+  assert.match(ayarBlogu, /href="options\.html"/, 'tam ayar sayfası bağlantısı yok');
+  assert.ok(ayarBlogu.lastIndexOf('yeniSayfadaAc') > ayarBlogu.lastIndexOf('govdeHakkinda'),
+    'link en altta değil (son bölümden sonra olmalı)');
+  assert.match(popupKod, /runtime\.openOptionsPage\(\)/, 'openOptionsPage kullanılmıyor');
+  assert.match(popupKod, /tabs\.create\(\{ url: rt\.getURL\('options\.html'\) \}\)/, 'tabs.create yedeği yok');
+  assert.match(popupKod, /\$\('yeniSayfadaAc'\)\.addEventListener\('click',[\s\S]{0,140}e\.preventDefault\(\)/,
+    'bağlantı varsayılan davranışa bırakılmış (çift sekme riski)');
+  assert.match(popupKod, /T\('ayar\.sayfadaGoster'\)/, 'link metni i18n anahtarından gelmiyor');
+  assert.equal(I.DICT.tr['ayar.sayfadaGoster'], 'Sayfada göster');
+  assert.ok(I.DICT.en['ayar.sayfadaGoster'], 'EN link metni yok');
+  assert.ok(I.DICT.tr['ayar.veriTamSayfa'] && I.DICT.en['ayar.veriTamSayfa'], 'Veri ipucu iki dilde yok');
+  const tr = JSON.parse(oku('_locales/tr/messages.json'));
+  const en = JSON.parse(oku('_locales/en/messages.json'));
+  assert.equal(tr.ayarSayfadaGoster.message, 'Sayfada göster', '_locales/tr: yeni link anahtarı yok');
+  assert.ok(en.ayarSayfadaGoster && en.ayarSayfadaGoster.message, '_locales/en: yeni link anahtarı yok');
+  assert.ok(tr.ayarVeriTamSayfa && en.ayarVeriTamSayfa, '_locales: Veri ipucu anahtarı iki dilde yok');
+});
+
 console.log(`\nSONUÇ: ${gecen} geçti, ${kalan} kaldı`);
 process.exit(kalan ? 1 : 0);
