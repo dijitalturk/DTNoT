@@ -7,45 +7,47 @@
   <link rel="stylesheet" href="assets/ui.css" />
 </head>
 <body class="popup">
-  <header class="ust">
-    <div class="marka">DTNoT<small id="altBaslik">Sayfada not bırak</small></div>
-    <div id="diller" class="diller" role="group" aria-label="Dil"></div>
-    <button type="button" id="panelAc" class="ikon-dugme" title="Notlarım" aria-label="Notlarım">≡</button>
-    <button type="button" id="ayarAc" class="ikon-dugme" title="Ayarlar" aria-label="Ayarlar">⚙</button>
-  </header>
+  <div class="govde yigin">
+    <header class="topbar">
+      <span class="marka-kutu" aria-hidden="true">📝</span>
+      <div class="topbar__metin min-w-0">
+        <h1 class="topbar__baslik">DTNoT</h1>
+        <p class="topbar__alt" id="altBaslik">Sayfada not bırak</p>
+      </div>
+      <div class="topbar__sag">
+        <div id="diller" class="diller" role="group" aria-label="Dil"></div>
+        <button type="button" id="panelAc" class="ikon-dugme ikon-dugme--soluk" title="Notlarım" aria-label="Notlarım">≡</button>
+        <button type="button" id="ayarAc" class="ikon-dugme ikon-dugme--soluk" title="Ayarlar" aria-label="Ayarlar">⚙</button>
+      </div>
+    </header>
 
-  <div class="govde">
     <div id="bildirim" class="durum" role="status" aria-live="polite"></div>
 
-    <section id="izinKutu" class="uyari" hidden>
+    <section id="izinKutu" class="panel panel--uyari yigin" hidden>
       <b id="izinBaslik"></b>
-      <div id="izinMetin" style="margin-top:4px"></div>
-      <div class="satir" style="margin-top:8px">
-        <button type="button" id="izinVer" class="dugme dugme--kucuk"></button>
+      <p id="izinMetin" class="ipucu"></p>
+      <div class="toolbar">
+        <button type="button" id="izinVer" class="btn btn--kucuk"></button>
       </div>
     </section>
 
-    <section class="kart">
-      <div class="satir aralik">
-        <div class="flex-1" style="min-width:0">
-          <div class="flex items-center gap-2" style="flex-wrap:wrap">
-            <span id="notRenk" class="renk-nokta" hidden></span>
-            <span class="etiket" id="sayfaEtiket">Bu sayfa</span>
-            <span id="bannerRozet" class="rozet rozet-banner" hidden>BANNER</span>
-          </div>
-          <div id="sayfaAdres" class="ipucu truncate" title="">…</div>
+    <section class="panel yigin">
+      <div class="toolbar">
+        <span id="notRenk" class="renk-nokta" hidden></span>
+        <span class="etiket" id="sayfaEtiket">Bu sayfa</span>
+        <span id="bannerRozet" class="pill pill--warn" hidden>BANNER</span>
+        <div class="toolbar__sag">
+          <span id="canliRozet" class="pill pill--ok" hidden>✓</span>
+          <button type="button" id="silDugme" class="btn btn--pill btn--danger" hidden>Sil</button>
         </div>
-        <span id="canliRozet" class="rozet" hidden>✓</span>
       </div>
+      <p id="sayfaAdres" class="ipucu truncate" title="">…</p>
 
-      <div class="satir" style="margin-top:10px">
-        <button type="button" id="ekleAc" class="dugme">Not ekle</button>
-        <button type="button" id="silDugme" class="dugme dugme--tehlike dugme--kucuk" hidden>Sil</button>
-      </div>
+      <button type="button" id="ekleAc" class="btn btn--primary">Not ekle</button>
 
-      <div id="ekleKutu" class="dikey" style="margin-top:10px" hidden>
-        <textarea id="metin" class="alan" maxlength="4000"></textarea>
-        <div class="flex items-center gap-2 flex-wrap">
+      <div id="ekleKutu" class="yigin" hidden>
+        <textarea id="metin" class="girdi" maxlength="4000"></textarea>
+        <div class="toolbar">
           <span class="etiket" id="renkEtiket"></span>
           <div id="renkler" class="renkler" role="group"></div>
           <span id="renkSecili" class="renk-secili"></span>
@@ -54,35 +56,36 @@
         <p class="ipucu" id="bannerNotu"></p>
         <label class="onay"><input type="checkbox" id="siteGeneliChk" disabled /> <span id="siteGeneliEtiket"></span></label>
         <p class="ipucu" id="siteGeneliNotu"></p>
-        <div class="satir">
-          <button type="button" id="kaydet" class="dugme">Kaydet</button>
-          <button type="button" id="vazgec" class="dugme dugme--ikincil">Vazgeç</button>
+        <button type="button" id="kaydet" class="btn btn--primary">Kaydet</button>
+        <button type="button" id="vazgec" class="btn">Vazgeç</button>
+      </div>
+
+      <p id="notOnizleme" class="ipucu" hidden></p>
+    </section>
+
+    <section class="panel yigin">
+      <div class="toolbar">
+        <h2 id="havuzBaslik" class="bolum-baslik">Notlarım</h2>
+        <div class="toolbar__sag">
+          <span id="toplamRozet" class="pill pill--soluk">0</span>
         </div>
       </div>
-
-      <p id="notOnizleme" class="ipucu" style="margin-top:10px" hidden></p>
+      <p class="ipucu" id="havuzNotu"></p>
+      <button type="button" id="panelDugme" class="btn">Tüm notlar</button>
     </section>
 
-    <section class="kart">
-      <div class="satir aralik">
-        <h2 id="havuzBaslik">Notlarım</h2>
-        <span id="toplamRozet" class="rozet">0</span>
-      </div>
-      <p class="ipucu" style="margin-top:6px" id="havuzNotu"></p>
-      <div class="satir" style="margin-top:8px">
-        <button type="button" id="panelDugme" class="dugme dugme--ikincil dugme--kucuk">Tüm notlar</button>
-      </div>
-    </section>
-
-    <a id="dtLink" class="alt-link" href="https://DijitalTurk.com" target="_blank" rel="noreferrer noopener">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="9"></circle>
-        <path d="M3 12h18"></path>
-        <path d="M12 3c2.6 3.2 2.6 14.8 0 18"></path>
-        <path d="M12 3c-2.6 3.2-2.6 14.8 0 18"></path>
-      </svg>
-      <span>DijitalTurk.com</span>
-    </a>
+    <div class="altbilgi">
+      <span id="altBilgi"></span>
+      <a id="dtLink" class="altbilgi__link" href="https://DijitalTurk.com" target="_blank" rel="noreferrer noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M3 12h18"></path>
+          <path d="M12 3c2.6 3.2 2.6 14.8 0 18"></path>
+          <path d="M12 3c-2.6 3.2-2.6 14.8 0 18"></path>
+        </svg>
+        <span>DijitalTurk.com</span>
+      </a>
+    </div>
   </div>
 
   <script src="assets/store.js"></script>
