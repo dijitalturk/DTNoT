@@ -79,6 +79,7 @@ not, post-it, yapışkan not, sayfa notu, note
 
 **Ekran görüntüleri (sırayla — hepsi 1280×800)**
 ```
+dist/magaza-5-site.png    → "Gerçek bir sayfada DTNoT notu (dijitalturk.com)"
 dist/magaza-icerik.png    → "Notlar sayfada seni bekler — sürüklenebilir post-it ve şeritler"
 dist/magaza-1-notlar.png  → "Aynı sayfanın notlarını popup'tan yönet"
 dist/magaza-2-panel.png   → "Notlarım — siteye göre gruplu liste, arama, renk filtresi"
