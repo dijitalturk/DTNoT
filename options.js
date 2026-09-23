@@ -10,6 +10,9 @@
 
   const saatAnahtar = (s) => 'saat.' + s;
 
+  /* Ekran durumu: ayarlar + not sayısı (bölüm özetleri bunlardan beslenir). */
+  const durum = { ayarlar: {}, sayi: 0 };
+
   async function cagri(tip, veri) {
     try {
       const r = await chrome.runtime.sendMessage(Object.assign({ tip: tip }, veri || {}));
@@ -20,7 +23,7 @@
 
   function bildir(metin, tur) {
     const el = $('bildirim');
-    el.className = (tur === 'tamam') ? 'tamam' : (tur === 'hata') ? 'hata' : 'durum';
+    el.className = (tur === 'tamam') ? 'mesaj' : (tur === 'hata') ? 'mesaj mesaj--hata' : 'durum';
     el.dataset.hata = tur === 'hata' ? '1' : '';
     el.textContent = metin || '';
   }
@@ -44,6 +47,7 @@
     $('gelistiriciEtiket').textContent = T('ayar.gelistirici').split(':')[0];
     try { $('surum').textContent = chrome.runtime.getManifest().version; } catch (e) { $('surum').textContent = '—'; }
     $('surumEtiket').textContent = T('ayar.surumEtiket');
+    try { $('altBilgi').textContent = 'DTNoT v' + chrome.runtime.getManifest().version; } catch (e) { /* yut */ }
     I.bayraklar($('diller'));
     // seçenekler (dil değişince metinleri tazelenir)
     const strateji = $('strateji');
@@ -68,6 +72,35 @@
     g.value = gSecili;
   }
 
+  /** Katlanır bölümler (standart .katlanir): başlık tıklanınca gövde açılır/kapanır.
+      Gövde DOM'dan SİLİNMEZ; yalnız `hidden` + data-acik değişir (otomasyon/arama bozulmaz). */
+  function katlanirlariKur() {
+    document.querySelectorAll('.katlanir').forEach((bolum) => {
+      const baslik = bolum.querySelector('.katlanir__baslik');
+      const govde = bolum.querySelector('.katlanir__govde');
+      const ok = bolum.querySelector('.katlanir__ok');
+      if (!baslik || !govde) return;
+      const uygula = (acik) => {
+        bolum.dataset.acik = acik ? 'true' : 'false';
+        baslik.setAttribute('aria-expanded', String(acik));
+        govde.hidden = !acik;
+        if (ok) ok.textContent = acik ? '▾' : '▸';
+      };
+      uygula(bolum.dataset.acik !== 'false');
+      baslik.addEventListener('click', () => { uygula(bolum.dataset.acik === 'false'); });
+    });
+  }
+
+  /** Bölüm başlıklarındaki TEK satırlık özetler: kapalıyken de bilgi görünür kalır. */
+  function ozetYaz() {
+    const a = durum.ayarlar || {};
+    $('ozetDil').textContent = I.dil().toUpperCase();
+    $('ozetDavranis').textContent = T(saatAnahtar(a.gizlemeSaat || 1));
+    $('ozetVeri').textContent = T('panel.toplam', { n: durum.sayi });
+    try { $('ozetHakkinda').textContent = T('ayar.surum', { 0: chrome.runtime.getManifest().version }); }
+    catch (e) { $('ozetHakkinda').textContent = ''; }
+  }
+
   function indir(metin, dosyaAdi) {
     const blob = new Blob([metin], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -83,16 +116,25 @@
   (async () => {
     await I.hazirla();
     const ayarlar = await S.ayarlariAl();
+    durum.ayarlar = ayarlar;
+    try { durum.sayi = (await S.hepsiniAl()).length; } catch (e) { durum.sayi = 0; }
     etiketle();
+    ozetYaz();
+    katlanirlariKur();
     $('gizleme').value = String(ayarlar.gizlemeSaat);
     $('sadeceAktif').checked = ayarlar.sadeceAktif === true;
 
     $('gizleme').addEventListener('change', async (e) => {
-      await S.ayarlariKaydet({ gizlemeSaat: Number(e.target.value) });
+      const yeni = Number(e.target.value);
+      durum.ayarlar = Object.assign({}, durum.ayarlar, { gizlemeSaat: yeni });
+      await S.ayarlariKaydet({ gizlemeSaat: yeni });
+      ozetYaz();
       bildir(T('popup.kaydedildi'), 'tamam');
     });
     $('sadeceAktif').addEventListener('change', async (e) => {
+      durum.ayarlar = Object.assign({}, durum.ayarlar, { sadeceAktif: e.target.checked });
       await S.ayarlariKaydet({ sadeceAktif: e.target.checked });
+      ozetYaz();
       bildir(T('popup.kaydedildi'), 'tamam');
     });
 
@@ -115,9 +157,11 @@
       if (strateji === 'replace' && !window.confirm(T('ayar.iceUyari'))) return;
       const r = await cagri('ICE_AKTAR', { json: metin, strateji: strateji });
       if (!r) { bildir(T('ayar.iceHata'), 'hata'); return; }
+      try { durum.sayi = (await S.hepsiniAl()).length; } catch (err) { /* özet sayısı eski kalır */ }
+      ozetYaz();
       bildir(T('ayar.iceOk', { n: r.sayi }), 'tamam');
     });
 
-    I.abone(() => { etiketle(); });
+    I.abone(() => { etiketle(); ozetYaz(); });
   })();
 })();

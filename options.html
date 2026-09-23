@@ -59,7 +59,7 @@
         <p class="ipucu" id="veriNot"></p>
         <button type="button" id="disaAktar" class="btn btn--primary"></button>
         <div class="toolbar">
-          <select id="strateji" class="ekle-secici"></select>
+          <select id="strateji" class="secici flex-1"></select>
           <button type="button" id="iceAktar" class="btn"></button>
           <input type="file" id="dosya" accept="application/json,.json" hidden />
         </div>
@@ -75,12 +75,17 @@
       </button>
       <div class="katlanir__govde yigin" id="govdeHakkinda" hidden>
         <p class="ipucu" id="hakkindaMetin"></p>
-        <div>
+        <div class="kv-liste">
           <div class="kv"><b id="surumEtiket"></b><span id="surum"></span></div>
           <div class="kv"><b id="gelistiriciEtiket"></b><a href="https://dijitalturk.com" target="_blank" rel="noopener noreferrer">DijitalTurk.com</a></div>
         </div>
       </div>
     </section>
+
+    <div class="altbilgi">
+      <span id="altBilgi"></span>
+      <a class="altbilgi__link" href="https://DijitalTurk.com" target="_blank" rel="noreferrer noopener">DijitalTurk.com</a>
+    </div>
   </div>
 
   <script src="assets/store.js"></script>
