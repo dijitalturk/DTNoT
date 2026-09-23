@@ -1,6 +1,11 @@
-/* DTNoT — popup: aktif sayfanın notu + hızlı ekleme + izin/panel + popup İÇİNDE
-   Ayarlar görünümü (gizleme süresi, Notlarım davranışı) ve tam sayfayı yeni
-   sekmede açan bağlantı. Tüm metinler TR/EN; dil değişince yeniden çizilir. */
+/* DTNoT — popup: İKİ görünüm.
+   (1) NOT görünümü (varsayılan): aktif sayfanın notu + hızlı ekleme + izin + Notlarım.
+   (2) AYARLAR görünümü (⚙ ile, popup İÇİNDE açılır; popup kapanmaz): options.html ile
+       AYNI katlanır bölümler (tema + Davranış · Veri · Hakkında), en altta
+       "Sayfada göster" bağlantısı (openOptionsPage + tabs.create yedeği).
+   Not ekleme/listesi BURADA OLMAZ: onların yeri Notlarım ekranı (panel.html/js);
+   bu yüzden ⚙ Ayarlar açıkken not görünümü tümüyle gizlenir. ✕ kapatma düğmesi YOK
+   (Ayarlar yine ⚙ ile kapanır). Tüm metinler TR/EN; dil değişince yeniden çizilir. */
 (function () {
   'use strict';
 
@@ -8,6 +13,7 @@
   const I = globalThis.DTNOT_I18N;
   const T = (k, v) => I.t(k, v);
   const $ = (id) => document.getElementById(id);
+  const saatAnahtar = (s) => 'saat.' + s;
 
   let durum = { url: '', anahtar: '', tabId: null, izin: null, kayitli: false, toplam: 0, not: null, ayarlar: {} };
   const form = { renk: 'sari', banner: false, siteGeneli: false };
@@ -84,16 +90,24 @@
     $('ayarAc').setAttribute('aria-label', T('ortak.ayarlar'));
     $('panelAc').title = T('panel.baslik');
     $('panelAc').setAttribute('aria-label', T('panel.baslik'));
-    /* Popup içindeki Ayarlar görünümü */
+    /* Popup içindeki Ayarlar görünümü — options.html ile AYNI bölümler/anahtarlar */
     $('ayarBaslik').textContent = T('ortak.ayarlar');
-    $('ayarKapat').title = T('ortak.kapat');
-    $('ayarKapat').setAttribute('aria-label', T('ortak.kapat'));
+    $('baslikDavranis').textContent = T('ayar.davranis');
     $('gizlemeEtiket').textContent = T('ayar.gizlemeSuresi');
     $('gizlemeNot').textContent = T('ayar.gizlemeNot');
     $('sadeceAktifEtiket').textContent = T('ayar.sadeceAktif');
     $('temaEtiket').textContent = T('ayar.tema');
-    $('yeniSayfadaAcMetin').textContent = T('ayar.yeniSayfada');
-    $('yeniSayfadaAc').title = T('ayar.yeniSayfada');
+    $('baslikVeri').textContent = T('ayar.veri');
+    $('veriNot').textContent = T('ayar.veriNot');
+    $('disaAktar').textContent = T('ayar.disaAktar');
+    $('veriTamSayfa').textContent = T('ayar.veriTamSayfa');
+    $('baslikHakkinda').textContent = T('ayar.hakkinda');
+    $('hakkindaMetin').textContent = T('ayar.hakkindaMetin');
+    $('gelistiriciEtiket').textContent = T('ayar.gelistirici').split(':')[0];
+    try { $('surum').textContent = chrome.runtime.getManifest().version; } catch (e) { $('surum').textContent = '—'; }
+    $('surumEtiket').textContent = T('ayar.surumEtiket');
+    $('yeniSayfadaAcMetin').textContent = T('ayar.sayfadaGoster');
+    $('yeniSayfadaAc').title = T('ayar.sayfadaGoster');
     gizlemeSecenekleriCiz();
     try { $('altBilgi').textContent = 'DTNoT v' + chrome.runtime.getManifest().version; } catch (e) { /* yut */ }
     I.bayraklar($('diller'));
@@ -138,6 +152,7 @@
       if (ham) $('notOnizleme').textContent = '';
     }
     ciz();
+    ozetYaz();
     if (mesajGoster) bildir(mesajGoster.metin, mesajGoster.tur);
   }
 
@@ -191,7 +206,7 @@
     try { window.close(); } catch (e) { /* yut */ }
   }
 
-  /* ---------- Ayarlar: popup'ın İÇİNDE açılır (popup kapanmaz) ---------- */
+  /* ---------- Ayarlar görünümü (popup'ın İÇİNDE açılır; popup kapanmaz) ---------- */
   /** Gizleme süresi seçenekleri — tek kaynak S.GIZLEME_SAAT (tam sayfayla aynı liste). */
   function gizlemeSecenekleriCiz() {
     const g = $('gizleme');
@@ -201,25 +216,62 @@
     S.GIZLEME_SAAT.forEach((saat) => {
       const o = document.createElement('option');
       o.value = String(saat);
-      o.textContent = T('saat.' + saat);
+      o.textContent = T(saatAnahtar(saat));
       g.appendChild(o);
     });
     g.value = secili;
   }
 
-  /** Popup'ta gösterilen ayarlar: gizleme süresi + Notlarım davranışı.
-      Karmaşık veri yönetimi (yedekleme/geri yükleme) yalnız tam sayfada kalır. */
+  /** Katlanır bölümler (standart .katlanir — options.js ile aynı sözleşme):
+      başlık tıklanınca gövde açılır/kapanır. Gövde DOM'dan SİLİNMEZ; yalnız
+      `hidden` + data-acik + aria-expanded değişir (arama/otomasyon bozulmaz). */
+  function katlanirlariKur() {
+    document.querySelectorAll('.katlanir').forEach((bolum) => {
+      const baslik = bolum.querySelector('.katlanir__baslik');
+      const govde = bolum.querySelector('.katlanir__govde');
+      const ok = bolum.querySelector('.katlanir__ok');
+      if (!baslik || !govde) return;
+      const uygula = (acik) => {
+        bolum.dataset.acik = acik ? 'true' : 'false';
+        baslik.setAttribute('aria-expanded', String(acik));
+        govde.hidden = !acik;
+        if (ok) ok.textContent = acik ? '▾' : '▸';
+      };
+      uygula(bolum.dataset.acik !== 'false');
+      baslik.addEventListener('click', () => { uygula(bolum.dataset.acik === 'false'); });
+    });
+  }
+
+  /** Bölüm başlıklarındaki TEK satırlık özetler (kapalıyken de bilgi görünür). */
+  function ozetYaz() {
+    const a = durum.ayarlar || {};
+    const ozetDavranis = $('ozetDavranis');
+    if (ozetDavranis) ozetDavranis.textContent = T(saatAnahtar(a.gizlemeSaat || 1));
+    const ozetVeri = $('ozetVeri');
+    if (ozetVeri) ozetVeri.textContent = T('panel.toplam', { n: durum.toplam || 0 });
+    const ozetHakkinda = $('ozetHakkinda');
+    if (!ozetHakkinda) return;
+    try { ozetHakkinda.textContent = T('ayar.surum', { 0: chrome.runtime.getManifest().version }); }
+    catch (e) { ozetHakkinda.textContent = ''; }
+  }
+
+  /** Popup'ta gösterilen ayarlar: gizleme süresi + tema + Notlarım davranışı.
+      Ağır veri yönetimi (JSON geri yükleme) tam sayfada kalır — dosya seçici
+      popup kapanınca iptal olabilir (bkz. options.js). */
   async function ayarlariYukle() {
     const a = await S.ayarlariAl();
     durum.ayarlar = a;
     gizlemeSecenekleriCiz();
     $('gizleme').value = String(a.gizlemeSaat);
     $('sadeceAktif').checked = a.sadeceAktif === true;
+    ozetYaz();
   }
 
-  /** Ayarlar görünümünü popup içinde aç/kapa (popup AÇIK kalır). */
+  /** Ayarlar görünümünü popup içinde aç/kapa (popup AÇIK kalır).
+      Açıkken NOT görünümü tümüyle gizlenir: Ayarlar'da not alanı görünmez. */
   async function ayarModu(ac) {
     $('ayarKutu').hidden = !ac;
+    $('notGorunum').hidden = !!ac;
     $('ayarAc').setAttribute('aria-pressed', String(!!ac));
     if (ac) await ayarlariYukle();
   }
@@ -237,6 +289,26 @@
       await tabs.create({ url: rt.getURL('options.html') });
       return true;
     } catch (e) { return false; }
+  }
+
+  function indir(metin, dosyaAdi) {
+    const blob = new Blob([metin], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = dosyaAdi;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  }
+
+  /** Veri bölümü: tarihli JSON yedeği indir (tam sayfayla aynı arka plan yolu). */
+  async function veriyiIndir() {
+    const r = await mesaj('DISA_AKTAR');
+    if (!r || !r.json) { bildir(T('ayar.iceHata'), 'hata'); return; }
+    indir(r.json, 'dtnot-yedek-' + new Date().toISOString().slice(0, 10) + '.json');
+    bildir(T('popup.kaydedildi'), 'tamam');
   }
 
   /* ---------- Sağ tık menüsünden gelen "ekle" isteği (tek seferlik) ---------- */
@@ -260,10 +332,12 @@
     const TM = globalThis.DTNOT_TEMA;
     if (TM) await TM.hazirla(); // kayıtlı tema (kök elemanda `db-acik`)
     etiketle();
+    katlanirlariKur(); // Ayarlar bölümleri: varsayılan açık/kapalı hâlleri data-acik'tan
     // Tema seçici: ORTAK render yolu (assets/tema.js) — sayfada kopya kod yok.
     if (TM) TM.seciciKur($('tema'), () => bildir(T('popup.kaydedildi'), 'tamam'));
     formuYukle(null);
     await tazele();
+    await ayarlariYukle();
     if (await bekleyeniTüket()) await ekleModu(true);
 
     $('ekleAc').addEventListener('click', () => ekleModu($('ekleKutu').hidden));
@@ -282,25 +356,28 @@
     $('izinVer').addEventListener('click', izinAl);
     $('panelAc').addEventListener('click', () => sekmeAc('panel.html'));
     $('panelDugme').addEventListener('click', () => sekmeAc('panel.html'));
-    // Ayarlar: popup İÇİNDE açılır — sekme açılmaz, popup kapanmaz.
+    // Ayarlar: popup İÇİNDE açılır — sekme açılmaz, popup kapanmaz. Kapanma YİNE ⚙ ile
+    // (✕ düğmesi yok): ayarAc aria-pressed durumu bildirir.
     $('ayarAc').addEventListener('click', () => ayarModu($('ayarKutu').hidden));
-    $('ayarKapat').addEventListener('click', () => ayarModu(false));
-    // Ayarların altındaki bağlantı: tam sayfa YENİ SEKMEDE (openOptionsPage + yedek)
+    // Ayarların EN ALTINDAKİ bağlantı: tam sayfa YENİ SEKMEDE (openOptionsPage + yedek)
     $('yeniSayfadaAc').addEventListener('click', (e) => { e.preventDefault(); tamAyarlariAc(); });
     $('gizleme').addEventListener('change', async (e) => {
       const yeni = Number(e.target.value);
       durum.ayarlar = Object.assign({}, durum.ayarlar, { gizlemeSaat: yeni });
       await S.ayarlariKaydet({ gizlemeSaat: yeni });
+      ozetYaz();
       bildir(T('popup.kaydedildi'), 'tamam');
     });
     $('sadeceAktif').addEventListener('change', async (e) => {
       durum.ayarlar = Object.assign({}, durum.ayarlar, { sadeceAktif: e.target.checked });
       await S.ayarlariKaydet({ sadeceAktif: e.target.checked });
+      ozetYaz();
       bildir(T('popup.kaydedildi'), 'tamam');
     });
+    $('disaAktar').addEventListener('click', veriyiIndir);
     $('metin').addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) kaydet();
     });
-    I.abone(() => { etiketle(); ciz(); });
+    I.abone(() => { etiketle(); ciz(); ozetYaz(); });
   })();
 })();

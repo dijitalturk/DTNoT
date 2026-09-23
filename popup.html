@@ -23,23 +23,118 @@
 
     <div id="bildirim" class="durum" role="status" aria-live="polite"></div>
 
-    <section id="ayarKutu" class="panel yigin" hidden>
+    <!-- NOT GÖRÜNÜMÜ (varsayılan): yalnız not işlemleri. ⚙ Ayarlar açıkken
+         tümü gizlenir — Ayarlar görünümünde not ekleme/liste alanı OLMAZ. -->
+    <div id="notGorunum" class="yigin">
+      <section id="izinKutu" class="panel panel--uyari yigin" hidden>
+        <b id="izinBaslik"></b>
+        <p id="izinMetin" class="ipucu"></p>
+        <div class="toolbar">
+          <button type="button" id="izinVer" class="btn btn--kucuk"></button>
+        </div>
+      </section>
+
+      <section class="panel yigin">
+        <div class="toolbar">
+          <span id="notRenk" class="renk-nokta" hidden></span>
+          <span class="etiket" id="sayfaEtiket">Bu sayfa</span>
+          <span id="bannerRozet" class="pill pill--warn" hidden>BANNER</span>
+          <div class="toolbar__sag">
+            <span id="canliRozet" class="pill pill--ok" hidden>✓</span>
+            <button type="button" id="silDugme" class="btn btn--pill btn--danger" hidden>Sil</button>
+          </div>
+        </div>
+        <p id="sayfaAdres" class="ipucu truncate" title="">…</p>
+
+        <button type="button" id="ekleAc" class="btn btn--primary">Not ekle</button>
+
+        <div id="ekleKutu" class="yigin" hidden>
+          <textarea id="metin" class="girdi" maxlength="4000"></textarea>
+          <div class="toolbar">
+            <span class="etiket" id="renkEtiket"></span>
+            <div id="renkler" class="renkler" role="group"></div>
+            <span id="renkSecili" class="renk-secili"></span>
+          </div>
+          <label class="onay"><input type="checkbox" id="bannerChk" /> <span id="bannerEtiket"></span></label>
+          <p class="ipucu" id="bannerNotu"></p>
+          <label class="onay"><input type="checkbox" id="siteGeneliChk" disabled /> <span id="siteGeneliEtiket"></span></label>
+          <p class="ipucu" id="siteGeneliNotu"></p>
+          <button type="button" id="kaydet" class="btn btn--primary">Kaydet</button>
+          <button type="button" id="vazgec" class="btn">Vazgeç</button>
+        </div>
+
+        <p id="notOnizleme" class="ipucu" hidden></p>
+      </section>
+
+      <section class="panel yigin">
+        <div class="toolbar">
+          <h2 id="havuzBaslik" class="bolum-baslik">Notlarım</h2>
+          <div class="toolbar__sag">
+            <span id="toplamRozet" class="pill pill--soluk">0</span>
+          </div>
+        </div>
+        <p class="ipucu" id="havuzNotu"></p>
+        <button type="button" id="panelDugme" class="btn">Tüm notlar</button>
+      </section>
+    </div>
+
+    <!-- AYARLAR-BASLANGIC — ⚙ ile açılan Ayarlar görünümü.
+         options.html ile AYNI bölümler (tema + Davranış · Veri · Hakkında),
+         AYNI varsayılanlar. Katlanır bölümler standart `.katlanir`
+         sözleşmesini kullanır; ✕ kapatma düğmesi YOK (kapanma ⚙ ile). -->
+    <section id="ayarKutu" class="yigin" hidden>
       <div class="toolbar">
         <h2 id="ayarBaslik" class="bolum-baslik"></h2>
-        <div class="toolbar__sag">
-          <button type="button" id="ayarKapat" class="ikon-dugme ikon-dugme--soluk" title="Kapat" aria-label="Kapat">✕</button>
+      </div>
+
+      <section class="panel katlanir" data-acik="true">
+        <button type="button" class="katlanir__baslik" aria-expanded="true" aria-controls="govdeDavranis">
+          <span class="katlanir__ok" aria-hidden="true">▾</span>
+          <span class="katlanir__ad" id="baslikDavranis"></span>
+          <span class="katlanir__ozet" id="ozetDavranis"></span>
+        </button>
+        <div class="katlanir__govde yigin" id="govdeDavranis">
+          <div class="ayar-satir">
+            <label class="secici__etiket" for="gizleme" id="gizlemeEtiket"></label>
+            <select id="gizleme" class="secici"></select>
+            <p class="ipucu" id="gizlemeNot"></p>
+          </div>
+          <label class="onay"><input type="checkbox" id="sadeceAktif" /> <span id="sadeceAktifEtiket"></span></label>
+          <div class="ayar-satir">
+            <label class="secici__etiket" for="tema" id="temaEtiket"></label>
+            <select id="tema" class="secici"></select>
+          </div>
         </div>
-      </div>
-      <div class="ayar-satir">
-        <label class="secici__etiket" for="gizleme" id="gizlemeEtiket"></label>
-        <select id="gizleme" class="secici"></select>
-        <p class="ipucu" id="gizlemeNot"></p>
-      </div>
-      <label class="onay"><input type="checkbox" id="sadeceAktif" /> <span id="sadeceAktifEtiket"></span></label>
-      <div class="ayar-satir">
-        <label class="secici__etiket" for="tema" id="temaEtiket"></label>
-        <select id="tema" class="secici"></select>
-      </div>
+      </section>
+
+      <section class="panel katlanir" data-acik="false">
+        <button type="button" class="katlanir__baslik" aria-expanded="false" aria-controls="govdeVeri">
+          <span class="katlanir__ok" aria-hidden="true">▸</span>
+          <span class="katlanir__ad" id="baslikVeri"></span>
+          <span class="katlanir__ozet" id="ozetVeri"></span>
+        </button>
+        <div class="katlanir__govde yigin" id="govdeVeri" hidden>
+          <p class="ipucu" id="veriNot"></p>
+          <button type="button" id="disaAktar" class="btn btn--primary"></button>
+          <p class="ipucu" id="veriTamSayfa"></p>
+        </div>
+      </section>
+
+      <section class="panel katlanir" data-acik="true">
+        <button type="button" class="katlanir__baslik" aria-expanded="true" aria-controls="govdeHakkinda">
+          <span class="katlanir__ok" aria-hidden="true">▾</span>
+          <span class="katlanir__ad" id="baslikHakkinda"></span>
+          <span class="katlanir__ozet" id="ozetHakkinda"></span>
+        </button>
+        <div class="katlanir__govde yigin" id="govdeHakkinda">
+          <p class="ipucu" id="hakkindaMetin"></p>
+          <div class="kv-liste">
+            <div class="kv"><b id="surumEtiket"></b><span id="surum"></span></div>
+            <div class="kv"><b id="gelistiriciEtiket"></b><a href="https://dijitalturk.com" target="_blank" rel="noopener noreferrer">DijitalTurk.com</a></div>
+          </div>
+        </div>
+      </section>
+
       <div class="altbilgi">
         <a id="yeniSayfadaAc" class="altbilgi__link" href="options.html" target="_blank" rel="noreferrer noopener">
           <span id="yeniSayfadaAcMetin"></span>
@@ -51,57 +146,7 @@
         </a>
       </div>
     </section>
-
-    <section id="izinKutu" class="panel panel--uyari yigin" hidden>
-      <b id="izinBaslik"></b>
-      <p id="izinMetin" class="ipucu"></p>
-      <div class="toolbar">
-        <button type="button" id="izinVer" class="btn btn--kucuk"></button>
-      </div>
-    </section>
-
-    <section class="panel yigin">
-      <div class="toolbar">
-        <span id="notRenk" class="renk-nokta" hidden></span>
-        <span class="etiket" id="sayfaEtiket">Bu sayfa</span>
-        <span id="bannerRozet" class="pill pill--warn" hidden>BANNER</span>
-        <div class="toolbar__sag">
-          <span id="canliRozet" class="pill pill--ok" hidden>✓</span>
-          <button type="button" id="silDugme" class="btn btn--pill btn--danger" hidden>Sil</button>
-        </div>
-      </div>
-      <p id="sayfaAdres" class="ipucu truncate" title="">…</p>
-
-      <button type="button" id="ekleAc" class="btn btn--primary">Not ekle</button>
-
-      <div id="ekleKutu" class="yigin" hidden>
-        <textarea id="metin" class="girdi" maxlength="4000"></textarea>
-        <div class="toolbar">
-          <span class="etiket" id="renkEtiket"></span>
-          <div id="renkler" class="renkler" role="group"></div>
-          <span id="renkSecili" class="renk-secili"></span>
-        </div>
-        <label class="onay"><input type="checkbox" id="bannerChk" /> <span id="bannerEtiket"></span></label>
-        <p class="ipucu" id="bannerNotu"></p>
-        <label class="onay"><input type="checkbox" id="siteGeneliChk" disabled /> <span id="siteGeneliEtiket"></span></label>
-        <p class="ipucu" id="siteGeneliNotu"></p>
-        <button type="button" id="kaydet" class="btn btn--primary">Kaydet</button>
-        <button type="button" id="vazgec" class="btn">Vazgeç</button>
-      </div>
-
-      <p id="notOnizleme" class="ipucu" hidden></p>
-    </section>
-
-    <section class="panel yigin">
-      <div class="toolbar">
-        <h2 id="havuzBaslik" class="bolum-baslik">Notlarım</h2>
-        <div class="toolbar__sag">
-          <span id="toplamRozet" class="pill pill--soluk">0</span>
-        </div>
-      </div>
-      <p class="ipucu" id="havuzNotu"></p>
-      <button type="button" id="panelDugme" class="btn">Tüm notlar</button>
-    </section>
+    <!-- AYARLAR-BITIS -->
 
     <div class="altbilgi">
       <span id="altBilgi"></span>

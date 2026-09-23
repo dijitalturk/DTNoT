@@ -82,6 +82,7 @@
       'ayar.veri': 'Veri',
       'ayar.veriNot': 'Notlar yalnız bu cihazda tutulur; hiçbir yere gönderilmez.',
       'ayar.disaAktar': 'JSON indir',
+      'ayar.veriTamSayfa': 'JSON yedeğini içe aktarmak için en alttaki “Sayfada göster” ile tam ayar sayfasını aç.',
       'ayar.iceAktar': 'Dosya seç…',
       'ayar.iceMerge': 'Birleştir (çakışmada en güncel kazanır)',
       'ayar.iceReplace': 'Değiştir (mevcut notların YERİNE geçer)',
@@ -93,7 +94,7 @@
       'ayar.hakkinda': 'Hakkında',
       'ayar.hakkindaMetin': 'DTNoT gizliliğine önem verir; hiçbir veriniz dışarı sızdırılmaz, tüm notlarınız kişisel bilgisayarınızda kalır.',
       'ayar.gelistirici': 'Geliştirici: DijitalTurk.com',
-      'ayar.yeniSayfada': 'Yeni sayfada aç',
+      'ayar.sayfadaGoster': 'Sayfada göster',
 
       'icerik.gizle': 'Notu gizle',
       'icerik.gizleSure': 'Notu {s} gizle',
@@ -179,6 +180,7 @@
       'ayar.veri': 'Data',
       'ayar.veriNot': 'Notes stay on this device only; nothing is uploaded anywhere.',
       'ayar.disaAktar': 'Download JSON',
+      'ayar.veriTamSayfa': 'To import a JSON backup, open the full settings page with “Show in full page” at the bottom.',
       'ayar.iceAktar': 'Choose file…',
       'ayar.iceMerge': 'Merge (newest wins on conflict)',
       'ayar.iceReplace': 'Replace (overwrites existing notes)',
@@ -190,7 +192,7 @@
       'ayar.hakkinda': 'About',
       'ayar.hakkindaMetin': 'DTNoT cares about your privacy: none of your data is leaked anywhere, and all your notes stay on your personal computer.',
       'ayar.gelistirici': 'Developer: DijitalTurk.com',
-      'ayar.yeniSayfada': 'Open in new tab',
+      'ayar.sayfadaGoster': 'Show in full page',
 
       'icerik.gizle': 'Hide note',
       'icerik.gizleSure': 'Hide note for {s}',

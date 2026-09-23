@@ -11,6 +11,14 @@
     "message": "Open in new tab",
     "description": "Link below the popup Settings area: opens the full settings page in a new tab"
   },
+  "ayarSayfadaGoster": {
+    "message": "Show in full page",
+    "description": "Link at the BOTTOM of the popup Settings view: opens the full settings page"
+  },
+  "ayarVeriTamSayfa": {
+    "message": "To import a JSON backup, open the full settings page with “Show in full page” at the bottom.",
+    "description": "Popup Data section: states that import lives on the full settings page"
+  },
   "ayarTema": {
     "message": "Theme",
     "description": "Settings: label of the dark/light theme selector"

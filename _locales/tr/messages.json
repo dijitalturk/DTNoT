@@ -11,6 +11,14 @@
     "message": "Yeni sayfada aç",
     "description": "Popup Ayarlar alanının altındaki bağlantı: tam ayar sayfasını yeni sekmede açar"
   },
+  "ayarSayfadaGoster": {
+    "message": "Sayfada göster",
+    "description": "Popup Ayarlar gorunumunun EN ALTINDAKI baglanti: tam ayar sayfasini acar"
+  },
+  "ayarVeriTamSayfa": {
+    "message": "JSON yedeğini içe aktarmak için en alttaki “Sayfada göster” ile tam ayar sayfasını aç.",
+    "description": "Popup Veri bolumu: ice aktarmanin tam ayar sayfasinda oldugunu soyler"
+  },
   "ayarTema": {
     "message": "Tema",
     "description": "Ayarlar: koyu/açık tema seçicisinin etiketi"
