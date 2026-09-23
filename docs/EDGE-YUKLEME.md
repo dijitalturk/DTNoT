@@ -77,12 +77,18 @@ Productivity (Verimlilik)
 not, post-it, yapışkan not, sayfa notu, note
 ```
 
-**Ekran görüntüleri (sırayla)**
+**Ekran görüntüleri (sırayla — hepsi 1280×800)**
 ```
-dist/magaza-popup.png    → "Sayfalara not bırak — post-it, banner, footer, etiket"
-dist/magaza-icerik.png   → "Notlar sayfada seni bekler — sürüklenebilir post-it ve şeritler"
-dist/magaza-panel.png    → "Notlarım — siteye göre gruplu liste, arama, renk filtresi"
+dist/magaza-icerik.png    → "Notlar sayfada seni bekler — sürüklenebilir post-it ve şeritler"
+dist/magaza-1-notlar.png  → "Aynı sayfanın notlarını popup'tan yönet"
+dist/magaza-2-panel.png   → "Notlarım — siteye göre gruplu liste, arama, renk filtresi"
+dist/magaza-3-duzenle.png → "Yerinde düzenleme — metin, renk, görünüm, site geneli"
+dist/magaza-4-ayarlar.png → "Ayarlar — gizleme süresi, tema, JSON yedek"
 ```
+
+> Not: `magaza-1..4` gerçek kullanım ekran görüntülerinden üretildi (kaynaklar küçük olduğu için
+> **büyütme yapılmadı**; markalı 1280×800 tuvale 1:1 yerleştirildi). Hepsini içeren paket:
+> `dist/dtnot-magaza-gorselleri.zip` (+ `edge-logo-300.png`).
 
 **Logo**
 ```
