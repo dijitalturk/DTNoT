@@ -25,7 +25,7 @@ post-it çizmek için popup'taki **"İzin ver"** düğmesiyle site erişimi veri
 Derleme adımı yok — dosyayı düzenle, eklentiyi yenile:
 
 ```bash
-node tests/dtnot-test.mjs   # 80 test: depo mantığı · i18n · mesajlaşma deseni · manifest · renk/banner/sürükleme · tema
+node tests/dtnot-test.mjs   # 81 test: depo mantığı · i18n · mesajlaşma deseni · manifest · renk/banner/sürükleme · tema
 python3 build.py            # paketle: Firefox .zip/.xpi + Chrome -chrome.zip + chrome-unpacked/
 python3 ikon-uret.py        # ikon setini yeniden üret (16/32/48/96/128)
 ```
@@ -83,7 +83,7 @@ Dosya düzeni:
   notlarınız kişisel bilgisayarınızda kalır"), "Gizle" süresi → "Notu kapattığınızda belirlediğiniz süre
   boyunca notunuz görünmez olur", "Yalnız aktif site" → "Notlarım ekranındayken… otomatik olarak
   filtreleyip gösterir".
-- **80 test** · Chrome ve Firefox'ta ölçüldü.
+- **81 test** · Chrome ve Firefox'ta ölçüldü.
 
 ## Ayarlar / tema güncellemeleri (paket sürümü değişmedi: 0.2.1)
 
