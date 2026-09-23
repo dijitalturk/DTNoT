@@ -565,5 +565,137 @@ await test('i18n: eski metinler kalmadı', () => {
   assert.ok(!metin.includes('Post-it’i gizle dediğinde'), 'eski gizlemeNot metni kalmış');
 });
 
+/* ================= 10) Tema (koyu / açık) ================= */
+console.log('\n10) Tema (koyu / açık)');
+
+// Kök element taklidi: tema YALNIZ `html.db-acik` sınıfıyla uygulanır.
+const siniflar = new Set();
+/** Minimal <select> taklidi: seçenekleri, değeri ve olay dinleyicilerini tutar. */
+function sahteSecici() {
+  return {
+    children: [],
+    value: '',
+    dinleyiciler: {},
+    get textContent() { return this.children.map((c) => c.textContent).join(''); },
+    set textContent(_v) { this.children = []; },
+    appendChild(o) { this.children.push(o); },
+    addEventListener(tip, fn) { (this.dinleyiciler[tip] = this.dinleyiciler[tip] || []).push(fn); },
+    tetikle(tip) { (this.dinleyiciler[tip] || []).forEach((fn) => fn({ target: this })); },
+  };
+}
+globalThis.document = {
+  createElement: (etiket) => ({ etiket, value: '', textContent: '', appendChild() {} }),
+  documentElement: {
+    classList: {
+      add: (c) => siniflar.add(c),
+      remove: (c) => siniflar.delete(c),
+      contains: (c) => siniflar.has(c),
+      toggle: (c, on) => {
+        const ac = (on === undefined) ? !siniflar.has(c) : !!on;
+        if (ac) siniflar.add(c); else siniflar.delete(c);
+        return ac;
+      },
+    },
+  },
+};
+new Function('chrome', 'document', oku('assets/tema.js'))(globalThis.chrome, globalThis.document);
+const TM = globalThis.DTNOT_TEMA;
+
+await test('tema: varsayılan KOYU (ayar modeli + kök elemanda db-acik yok)', async () => {
+  assert.equal(S.VARSAYILAN_AYAR.tema, 'koyu');
+  assert.equal((await S.ayarlariAl()).tema, 'koyu');
+  await TM.hazirla();
+  assert.equal(globalThis.document.documentElement.classList.contains('db-acik'), false, 'varsayılan açık temaya düşmüş');
+});
+await test('tema: bilinmeyen/bozuk değer güvenle KOYUya düşer', async () => {
+  assert.equal(S.temizTema('acik'), 'acik');
+  assert.equal(S.temizTema('koyu'), 'koyu');
+  ['mor', '', null, undefined, 42].forEach((v) => assert.equal(S.temizTema(v), 'koyu', 'bozuk değer koyuya düşmedi: ' + String(v)));
+  await S.ayarlariKaydet({ tema: 'neon' });
+  assert.equal((await S.ayarlariAl()).tema, 'koyu', 'depodaki bozuk tema normalize edilmedi');
+  assert.equal(TM.temiz('neon'), 'koyu');
+  await S.ayarlariKaydet({ tema: 'koyu' });
+});
+await test('tema: acik → kök elemanda db-acik VAR; koyu → YOK (anında uygulanır)', () => {
+  const el = globalThis.document.documentElement;
+  assert.equal(TM.uygula('acik'), 'acik');
+  assert.equal(el.classList.contains('db-acik'), true, 'açık temada db-acik eklenmiyor');
+  assert.equal(TM.uygula('koyu'), 'koyu');
+  assert.equal(el.classList.contains('db-acik'), false, 'koyu temada db-acik kaldırılmıyor');
+  TM.uygula('bozuk');
+  assert.equal(el.classList.contains('db-acik'), false, 'bozuk değer açık temaya sokmamalı');
+});
+await test('tema: kayıtlı tema sayfa açılışında uygulanıyor (hazirla)', async () => {
+  const el = globalThis.document.documentElement;
+  await S.ayarlariKaydet({ tema: 'acik' });
+  await TM.hazirla();
+  assert.equal(el.classList.contains('db-acik'), true);
+  await S.ayarlariKaydet({ tema: 'koyu' });
+  await TM.hazirla();
+  assert.equal(el.classList.contains('db-acik'), false);
+});
+await test('tema: seçici popup + Ayarlar’da ORTAK render yolundan (kopya kod yok)', () => {
+  ['popup.js', 'options.js'].forEach((dosya) => {
+    const kod = oku(dosya);
+    assert.match(kod, /(?:DTNOT_TEMA|TM)\.seciciKur\(\$\('tema'\)/, dosya + ': ortak tema seçici kurulmuyor');
+    assert.match(kod, /\.hazirla\(\)/, dosya + ': kayıtlı tema uygulanmıyor');
+    assert.ok(!/temaKoyu|temaAcik/.test(kod), dosya + ': tema seçenekleri kopyalanmış (assets/tema.js kullanılmalı)');
+  });
+  assert.match(oku('panel.js'), /DTNOT_TEMA\.hazirla\(\)/, 'Notlarım ekranı temayı uygulamıyor');
+  ['popup.html', 'panel.html', 'options.html'].forEach((sayfa) => {
+    assert.match(oku(sayfa), /src="assets\/tema\.js"/, sayfa + ': tema.js yüklenmiyor');
+  });
+  ['popup.html', 'options.html'].forEach((sayfa) => {
+    assert.match(oku(sayfa), /id="tema" class="secici"/, sayfa + ': tema seçicisi (select.secici) yok');
+    assert.match(oku(sayfa), /id="temaEtiket"/, sayfa + ': tema etiketi yok');
+  });
+});
+await test('tema: i18n anahtarları iki dilde (sözlük + _locales)', () => {
+  ['ayar.tema', 'ayar.temaKoyu', 'ayar.temaAcik'].forEach((k) => {
+    assert.ok(I.DICT.tr[k], 'tr/' + k + ' yok');
+    assert.ok(I.DICT.en[k], 'en/' + k + ' yok');
+  });
+  assert.equal(I.DICT.tr['ayar.temaKoyu'], 'Koyu');
+  assert.equal(I.DICT.en['ayar.temaAcik'], 'Light');
+  const tr = JSON.parse(oku('_locales/tr/messages.json'));
+  const en = JSON.parse(oku('_locales/en/messages.json'));
+  ['ayarTema', 'ayarTemaKoyu', 'ayarTemaAcik'].forEach((k) => {
+    assert.ok(tr[k] && tr[k].message, 'tr/' + k + ' yok');
+    assert.ok(en[k] && en[k].message, 'en/' + k + ' yok');
+  });
+});
+await test('tema: ortak seçici (seciciKur) çizer, değişimde ANINDA uygular + kaydeder', async () => {
+  const el = sahteSecici();
+  TM.seciciKur(el);
+  assert.deepEqual(el.children.map((o) => o.value), ['koyu', 'acik'], 'seçenekler yanlış');
+  assert.deepEqual(el.children.map((o) => o.textContent), ['Koyu', 'Açık'], 'seçenek metinleri i18n’den gelmiyor');
+  assert.equal(el.value, 'koyu', 'kayıtlı değer seçili değil');
+  el.value = 'acik';
+  el.tetikle('change');
+  assert.equal(globalThis.document.documentElement.classList.contains('db-acik'), true, 'seçim ANINDA uygulanmıyor');
+  await new Promise((r) => setTimeout(r, 0));
+  assert.equal((await S.ayarlariAl()).tema, 'acik', 'seçim depoya yazılmadı');
+  await I.dilAyarla('en'); // dil değişince seçenek metinleri tazelenir (tek abonelik)
+  assert.deepEqual(el.children.map((o) => o.textContent), ['Dark', 'Light'], 'dil değişince metinler tazelenmiyor');
+  assert.equal(el.value, 'acik', 'dil değişince seçim kayboluyor');
+  await I.dilAyarla('tr');
+  TM.uygula('koyu');
+  await S.ayarlariKaydet({ tema: 'koyu' });
+});
+await test('tema: ui.css açık tema bloğu (tokenlar + color-scheme) ve okunurluk düzeltmeleri', () => {
+  const css = oku('assets/ui.css');
+  const blok = css.match(/html\.db-acik\s*\{[\s\S]{0,600}?\}/);
+  assert.ok(blok, 'html.db-acik bloğu yok (kaynak tema.css bloğu taşınmamış)');
+  ['--db-bg', '--db-surface', '--db-surface-2', '--db-border', '--db-border-strong', '--db-text', '--db-muted', '--db-dim'].forEach((v) => {
+    assert.ok(blok[0].includes(v + ':'), 'açık temada eksik token: ' + v);
+  });
+  assert.match(blok[0], /color-scheme:\s*light/, 'color-scheme: light yok');
+  assert.match(css, /html\.db-acik \.topbar__baslik\s*\{[^}]*var\(--db-text\)/, 'açık temada başlık beyaz kalıyor (okunmaz)');
+  assert.match(css, /html\.db-acik \.girdi/, 'açık temada girdi zemini düzeltilmemiş');
+  assert.match(css, /html\.db-acik \.secici/, 'açık temada seçici zemini düzeltilmemiş');
+  assert.match(css, /html\.db-acik \.btn:hover/, 'açık temada düğme hover zemini düzeltilmemiş');
+  assert.match(css, /html\.db-acik \.ikon-dugme:hover/, 'açık temada ikon düğmesi hover zemini düzeltilmemiş');
+});
+
 console.log(`\nSONUÇ: ${gecen} geçti, ${kalan} kaldı`);
 process.exit(kalan ? 1 : 0);

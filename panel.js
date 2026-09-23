@@ -284,6 +284,8 @@
 
   (async () => {
     await I.hazirla();
+    // Kullanıcının seçtiği tema DTNoT yüzeylerinde uygulanır (kök elemanda `db-acik`)
+    if (globalThis.DTNOT_TEMA) await globalThis.DTNOT_TEMA.hazirla();
     etiketle();
     const a = await S.ayarlariAl();
     sadeceAktif = a.sadeceAktif === true;

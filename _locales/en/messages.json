@@ -10,5 +10,17 @@
   "ayarYeniSayfada": {
     "message": "Open in new tab",
     "description": "Link below the popup Settings area: opens the full settings page in a new tab"
+  },
+  "ayarTema": {
+    "message": "Theme",
+    "description": "Settings: label of the dark/light theme selector"
+  },
+  "ayarTemaKoyu": {
+    "message": "Dark",
+    "description": "Theme selector: dark (default)"
+  },
+  "ayarTemaAcik": {
+    "message": "Light",
+    "description": "Theme selector: light"
   }
 }
