@@ -10,5 +10,17 @@
   "ayarYeniSayfada": {
     "message": "Yeni sayfada aç",
     "description": "Popup Ayarlar alanının altındaki bağlantı: tam ayar sayfasını yeni sekmede açar"
+  },
+  "ayarTema": {
+    "message": "Tema",
+    "description": "Ayarlar: koyu/açık tema seçicisinin etiketi"
+  },
+  "ayarTemaKoyu": {
+    "message": "Koyu",
+    "description": "Tema seçici: koyu (varsayılan)"
+  },
+  "ayarTemaAcik": {
+    "message": "Açık",
+    "description": "Tema seçici: açık"
   }
 }

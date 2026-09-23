@@ -12,7 +12,7 @@
   const METIN_MAX = 4000;
   const UYARI_NOT = 300;
   const GIZLEME_SAAT = [1, 4, 24, 168];
-  const VARSAYILAN_AYAR = { lang: 'tr', gizlemeSaat: 1, sadeceAktif: false };
+  const VARSAYILAN_AYAR = { lang: 'tr', gizlemeSaat: 1, sadeceAktif: false, tema: 'koyu' };
   /** 6 post-it rengi (tek alan: `renk`; eski kayıtlar varsayılana düşer → şema bozulmaz). */
   const RENKLER = ['sari', 'yesil', 'mavi', 'pembe', 'mor', 'turuncu'];
   const RENK_VARSAYILAN = 'sari';
@@ -321,6 +321,11 @@
   }
 
   /* ---------- Ayarlar ---------- */
+  /** Tema doğrulama: yalnız 'acik' açık tema; bilinmeyen/bozuk değer 'koyu'ya düşer. */
+  function temizTema(v) {
+    return v === 'acik' ? 'acik' : 'koyu';
+  }
+
   async function ayarlariAl() {
     try {
       const d = await chrome.storage.local.get(SETTINGS_KEY);
@@ -331,6 +336,7 @@
         lang: a.lang === 'en' ? 'en' : 'tr',
         gizlemeSaat: GIZLEME_SAAT.indexOf(saat) !== -1 ? saat : VARSAYILAN_AYAR.gizlemeSaat,
         sadeceAktif: a.sadeceAktif === true,
+        tema: temizTema(a.tema),
       };
     } catch (e) {
       return Object.assign({}, VARSAYILAN_AYAR);
@@ -370,7 +376,7 @@
     temizNot, dogrula, grupla, birlestir, gorunurMu, sayfaUrl,
     temizRenk, temizKonum, temizAlanlar, kisaltOrtadan, katla, bannerNotu, sayfaNotu, filtrele,
     hepsiniAl, ekle, notuAl, sil, guncelle, yaz,
-    ayarlariAl, ayarlariKaydet,
+    ayarlariAl, ayarlariKaydet, temizTema,
     disaAktarMetni, iceAktarCoz,
   };
 })();

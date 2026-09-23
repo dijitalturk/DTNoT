@@ -1084,3 +1084,15 @@ html.db-acik .renk-sec[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--db-sur
 html.db-acik .dil-dugme:hover { background: rgba(15, 23, 42, 0.06); }
 html.db-acik .ikon-dugme:hover:not(:disabled) { background: rgba(15, 23, 42, 0.06); }
 html.db-acik .btn:hover:not(:disabled) { background: var(--db-surface-2); }
+
+/* Açık temada OKUNURLUK: koyu zemin için seçilmiş sabit tonlu metinler beyaz
+   zeminde okunmaz kalır. Ton düzeltmeleri YALNIZ burada (tek kaynak) yapılır;
+   bileşenler tema farkını bilmez, renk bu blokta verilir. */
+html.db-acik .topbar__baslik { color: var(--db-text); }
+html.db-acik a { color: #047857; }
+html.db-acik .altbilgi__link:hover { color: #047857; border-bottom-color: rgba(4, 120, 87, 0.5); }
+html.db-acik .mesaj { color: #047857; }
+html.db-acik .mesaj--hata { color: #b91c1c; }
+html.db-acik .pill--ok { color: #047857; }
+html.db-acik .pill--warn { color: #a16207; }
+html.db-acik .pill--danger { color: #b91c1c; }

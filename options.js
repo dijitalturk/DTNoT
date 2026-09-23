@@ -37,6 +37,7 @@
     $('gizlemeEtiket').textContent = T('ayar.gizlemeSuresi');
     $('gizlemeNot').textContent = T('ayar.gizlemeNot');
     $('sadeceAktifEtiket').textContent = T('ayar.sadeceAktif');
+    $('temaEtiket').textContent = T('ayar.tema');
     $('baslikVeri').textContent = T('ayar.veri');
     $('veriNot').textContent = T('ayar.veriNot');
     $('disaAktar').textContent = T('ayar.disaAktar');
@@ -119,12 +120,16 @@
 
   (async () => {
     await I.hazirla();
+    const TM = globalThis.DTNOT_TEMA;
+    if (TM) await TM.hazirla(); // kayıtlı tema (kök elemanda `db-acik`)
     const ayarlar = await S.ayarlariAl();
     durum.ayarlar = ayarlar;
     durum.sayi = await notSayisiAl();
     etiketle();
     ozetYaz();
     katlanirlariKur();
+    // Tema seçici: ORTAK render yolu (assets/tema.js) — sayfada kopya kod yok.
+    if (TM) TM.seciciKur($('tema'), () => bildir(T('popup.kaydedildi'), 'tamam'));
     $('gizleme').value = String(ayarlar.gizlemeSaat);
     $('sadeceAktif').checked = ayarlar.sadeceAktif === true;
 
