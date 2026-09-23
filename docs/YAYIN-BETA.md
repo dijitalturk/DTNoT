@@ -112,6 +112,7 @@ Teknik notlar:
   (Chrome). Firefox'ta yalnız `service_worker` yazılırsa kurulum reddediliyor.
 - İçerik betiği yalnız DOM'a not çizer; sayfa içeriğini okumaz veya iletmez.
 - Minify/bundle/eval yok (paket = kaynak). Depo anahtarları sabittir: web-not-store / web-not-settings.
+- Kaynak kodu gönderimi gerekmez; depodaki manifest ile paketteki manifest arasındaki tek fark, Firefox paketinde `background.service_worker` anahtarının çıkarılmış olmasıdır (bkz. `build.py`).
 ```
 
 ## 6) Beta kanal planı

@@ -139,6 +139,7 @@ Teknik notlar:
 - Arka plan Firefox'ta `background.scripts` ile tanımlıdır (Chrome paketinde `service_worker`).
 - İçerik betiği yalnız DOM'a not çizer; sayfa içeriğini okumaz veya iletmez.
 - Minify/bundle/eval yoktur (paket doğrudan kaynaktır). Depo anahtarları sabittir: web-not-store / web-not-settings.
+- Kaynak kodu gönderimi gerekmez. Depodaki manifest.json ile paketteki manifest.json arasındaki TEK fark: Firefox paketinde `background.service_worker` anahtarı çıkarılmıştır (Firefox bu anahtarı yok sayar); JS/CSS/HTML dosyaları depodakiyle birebir aynıdır (bkz. `build.py`).
 ```
 
 ---
