@@ -105,8 +105,9 @@ bilgiyi gizlememek.
 
 Kurallar:
 
-- Açık/kapalı durumu **bölüm başına** `data-acik="true|false"` ile verilir
-  (Ayarlar: Davranış **ve** Hakkında açık; Veri kapalı).
+- Açık/kapalı durumu **bölüm başına** `data-acik="true|false"` ile verilir.
+  Varsayılanlar **`options.html` ve popup içi Ayarlar'da aynıdır**: Davranış
+  **ve** Hakkında açık, Veri kapalı.
 - Gövde **DOM'dan silinmez**; yalnız `hidden` + `data-acik` değişir
   (`ui.css`: `[hidden] { display: none !important }` ve
   `.katlanir[data-acik='false'] .katlanir__govde`). Böylece arama/otomasyon
@@ -118,6 +119,15 @@ Kurallar:
   tarar, `data-acik` / `aria-expanded` / `hidden` / ok (▾ ▸) değerlerini
   yönetir. Özetler `ozetYaz()` ile yazılır (dil değişince ve ayar kaydında
   tazelenir).
+- **Popup içi Ayarlar görünümü** de aynı sözleşmeyi kullanır (`popup.js` →
+  `katlanirlariKur()` + `ozetYaz()`), ama **ayrı bir görünümdür**: Ayarlar
+  açıkken popup'ın not görünümü (`#notGorunum`: not ekleme + Notlarım) gizlenir;
+  not alanları Ayarlar'da **hiç görünmez** (onların yeri Notlarım ekranı,
+  `panel.html`/`panel.js`). Kapatma düğmesi (**✕**) **yoktur** — Ayarlar ⚙
+  düğmesiyle açılıp kapanır (`aria-pressed` durumu korunur) — ve görünümün en
+  altında **"Sayfada göster"** bağlantısı (`.altbilgi__link`) tam ayar sayfasını
+  `openOptionsPage()` (yedek: `tabs.create({ url: runtime.getURL('options.html') })`)
+  ile açar.
 - Yeni bölüm eklerken özet metni **mevcut i18n anahtarlarından** üretilir;
   sözlüğe yeni anahtar eklemek gerekirse TR **ve** EN birlikte eklenir
   (`tests/dtnot-test.mjs` anahtar kümelerinin birebir aynı olmasını zorlar).
@@ -181,15 +191,17 @@ renkleri yine `PALET` verisinden alır.
 ## 8. Doğrulama (her değişiklikten sonra)
 
 ```bash
-node tests/dtnot-test.mjs     # 81 test: depo mantığı + i18n + mesajlaşma + manifest/paket kilidi + tema
+node tests/dtnot-test.mjs     # 86 test: depo mantığı + i18n + mesajlaşma + manifest/paket kilidi + tema + popup Ayarlar görünümü
 python3 build.py              # 4 çıktı: zip (Firefox/Zen), xpi, chrome zip, dist/chrome-unpacked
 ```
 
 Testler arayüzü şu noktalardan kilitler: `assets/ui.css`'in varlığı ve `[hidden]`
 kuralı, `.diller`/`.dil-dugme` yerleşimi, üst bar ikonlarının bayrakla eşit
-ölçüsü, popup içi Ayarlar görünümü + "Yeni sayfada aç" bağlantısı
-(`openOptionsPage` + `tabs.create` yedeği), Ayarlar'da dil seçicinin yokluğu,
-varsayılan katlanır durumları (Hakkında açık · Veri kapalı), tema
+ölçüsü, popup içi Ayarlar görünümü (not ekleme/liste alanı YOK · katlanır
+bölümler · varsayılanlar options ile aynı · ✕ düğmesi yok) + en alttaki
+"Sayfada göster" bağlantısı (`openOptionsPage` + `tabs.create` yedeği),
+Ayarlar'da dil seçicinin yokluğu, varsayılan katlanır durumları (Davranış ve
+Hakkında açık · Veri kapalı), tema
 (varsayılan `koyu`, `acik` → `db-acik`, bozuk değer → `koyu`, seçicinin ortak
 render yolu), seçili renk vurgusu, popup genişliği + alt bağlantı, kullanılan her
 i18n anahtarının sözlükte olması, TR/EN anahtar kümelerinin ve `_locales`
@@ -204,7 +216,7 @@ eklerken önce standart sözlüğe bakın.
 | `assets/store.js` | veri katmanı + ayar modeli (`temizTema`) + post-it `PALET` (veri) |
 | `assets/i18n.js` | TR/EN sözlüğü + `.dil-dugme` bayrakları |
 | `assets/tema.js` | tema (koyu/açık): `db-acik` sınıfını uygulayan + popup/Ayarlar ortak seçici |
-| `popup.html` / `popup.js` | popup ekranı (448px) + popup içi Ayarlar görünümü |
+| `popup.html` / `popup.js` | popup ekranı (448px): **not görünümü** + **popup içi Ayarlar görünümü** (katlanır bölümler) |
 | `panel.html` / `panel.js` | Notlarım ekranı (liste, arama, renk filtresi) |
 | `options.html` / `options.js` | Ayarlar ekranı (katlanır bölümler, tema, yedekleme) |
 | `content.js` | sayfa üstü post-it/banner (gölge DOM, host sayfa) |

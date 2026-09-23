@@ -25,7 +25,7 @@ post-it çizmek için popup'taki **"İzin ver"** düğmesiyle site erişimi veri
 Derleme adımı yok — dosyayı düzenle, eklentiyi yenile:
 
 ```bash
-node tests/dtnot-test.mjs   # 81 test: depo mantığı · i18n · mesajlaşma deseni · manifest · renk/banner/sürükleme · tema
+node tests/dtnot-test.mjs   # 86 test: depo mantığı · i18n · mesajlaşma deseni · manifest · renk/banner/sürükleme · tema · popup Ayarlar görünümü
 python3 build.py            # paketle: Firefox .zip/.xpi + Chrome -chrome.zip + chrome-unpacked/
 python3 ikon-uret.py        # ikon setini yeniden üret (16/32/48/96/128)
 ```
@@ -40,7 +40,7 @@ Dosya düzeni:
 | `assets/tema.js` | Tema: `db-acik` sınıfını uygular, popup ve Ayarlar aynı seçiciyi buradan kurar |
 | `background.js` | İçerik betiği kaydı (izne bağlı), sağ tık menüsü, **tüm depo işlemleri** |
 | `content.js` | Sayfa içi post-it (Shadow DOM); notu **mesajla** arka plandan ister |
-| `popup.*` | Aktif sayfanın notu + hızlı ekleme + izin/panel + **popup içi Ayarlar** |
+| `popup.*` | Aktif sayfanın notu + hızlı ekleme + izin/panel + **popup içi Ayarlar** (options ile aynı katlanır bölümler) |
 | `panel.*` | Notlarım: site grupları, arama, satır içi düzenle/sil/sayfayı aç |
 | `options.*` | Gizleme süresi, tema, panel davranışı, **JSON dışa/içe aktarma** |
 | `_locales/tr|en` | Mağaza adı/açıklaması (`__MSG_…__`), `default_locale` |
@@ -83,15 +83,21 @@ Dosya düzeni:
   notlarınız kişisel bilgisayarınızda kalır"), "Gizle" süresi → "Notu kapattığınızda belirlediğiniz süre
   boyunca notunuz görünmez olur", "Yalnız aktif site" → "Notlarım ekranındayken… otomatik olarak
   filtreleyip gösterir".
-- **81 test** · Chrome ve Firefox'ta ölçüldü.
+- **86 test** · Chrome ve Firefox'ta ölçüldü.
 
 ## Ayarlar / tema güncellemeleri (paket sürümü değişmedi: 0.2.1)
 
-- **Ayarlar artık popup İÇİNDE açılıyor** (sekme açılmıyor, popup kapanmıyor): popup'ta gizleme süresi,
-  "Yalnız aktif site" davranışı ve tema seçici; altında **"Yeni sayfada aç ↗"** bağlantısı tam ayar
-  sayfasını **yeni sekmede** açar (`runtime.openOptionsPage()`; desteklenmezse
-  `tabs.create({ url: runtime.getURL('options.html') })`). Karmaşık veri yönetimi (JSON yedekleme/geri
-  yükleme) bilinçli olarak tam sayfada kaldı — dosya seçici popup kapanınca iptal olabilir.
+- **Ayarlar popup İÇİNDE açılıyor** (sekme açılmıyor, popup kapanmıyor) ve **options.html ile aynı
+  katlanır bölümleri** gösterir: **Davranış** (gizleme süresi · "Yalnız aktif site" · tema seçici) ·
+  **Veri** · **Hakkında** — varsayılanlar da aynı (Davranış ve Hakkında açık, Veri kapalı).
+- **Ayarlar açıkken popup'ın not görünümü gizlenir:** not ekleme kutusu, not listesi ve not işlemleri
+  Ayarlar'da **görünmez** — onların yeri **Notlarım** ekranıdır (`panel.html` / `panel.js`).
+- **✕ kapatma düğmesi kaldırıldı:** Ayarlar yine ⚙ düğmesiyle açılıp kapanır (⚙ açıkken "etkin"
+  görünür, `aria-pressed` durumu korunur).
+- **Ayarlar'ın EN ALTINDA "Sayfada göster" linki:** tam ayar sayfasını **yeni sekmede** açar
+  (`runtime.openOptionsPage()`; desteklenmezse `tabs.create({ url: runtime.getURL('options.html') })`).
+  Karmaşık veri yönetimi (JSON geri yükleme) bilinçli olarak tam sayfada kaldı — dosya seçici popup
+  kapanınca iptal olabilir; popup'ın Veri bölümünde **"JSON indir"** ve tam sayfa ipucu bulunur.
 - **Popup üst bar ikonları** (Notlarım ≡ · Ayarlar ⚙) bayrak düğmeleriyle **aynı ölçüde** (34×30 +
   `flex: none`); Ayarlar popup içinde açıkken ⚙ "etkin" görünür.
 - **Ayarlar'daki dil seçimi kaldırıldı**: "Dil" katlanır bölümü, başlıktaki `TR/EN` özeti ve üst bardaki
