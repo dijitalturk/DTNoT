@@ -7,49 +7,79 @@
   <link rel="stylesheet" href="assets/ui.css" />
 </head>
 <body class="tam-sayfa">
-  <div class="govde">
-    <header class="ust" style="border:1px solid var(--cizgi);border-radius:12px;box-shadow:var(--golge)">
-      <div class="marka">DTNoT<small id="altBaslik">Ayarlar</small></div>
-      <div id="diller" class="diller" role="group" aria-label="Dil"></div>
+  <div class="govde yigin">
+    <header class="topbar">
+      <span class="marka-kutu" aria-hidden="true">📝</span>
+      <div class="topbar__metin min-w-0">
+        <h1 class="topbar__baslik">DTNoT</h1>
+        <p class="topbar__alt" id="altBaslik">Ayarlar</p>
+      </div>
+      <div class="topbar__sag">
+        <div id="diller" class="diller" role="group" aria-label="Dil"></div>
+      </div>
     </header>
 
-    <section class="kart" style="margin-top:14px">
-      <h2 id="baslikDil"></h2>
-      <p class="ipucu" id="dilNot"></p>
-      <div id="dilSatir" class="satir" style="margin-top:8px"></div>
+    <div id="bildirim" class="durum" role="status" aria-live="polite"></div>
+
+    <section class="panel katlanir" data-acik="true">
+      <button type="button" class="katlanir__baslik" aria-expanded="true" aria-controls="govdeDil">
+        <span class="katlanir__ok" aria-hidden="true">▾</span>
+        <span class="katlanir__ad" id="baslikDil"></span>
+        <span class="katlanir__ozet" id="ozetDil"></span>
+      </button>
+      <div class="katlanir__govde yigin" id="govdeDil">
+        <p class="ipucu" id="dilNot"></p>
+        <div id="dilSatir" class="toolbar"></div>
+      </div>
     </section>
 
-    <section class="kart" style="margin-top:12px">
-      <h2 id="baslikDavranis"></h2>
-      <div class="ayar-grup" style="margin-top:8px">
+    <section class="panel katlanir" data-acik="true">
+      <button type="button" class="katlanir__baslik" aria-expanded="true" aria-controls="govdeDavranis">
+        <span class="katlanir__ok" aria-hidden="true">▾</span>
+        <span class="katlanir__ad" id="baslikDavranis"></span>
+        <span class="katlanir__ozet" id="ozetDavranis"></span>
+      </button>
+      <div class="katlanir__govde yigin" id="govdeDavranis">
         <div class="ayar-satir">
-          <label class="etiket" for="gizleme" id="gizlemeEtiket"></label>
-          <select id="gizleme" class="alan"></select>
+          <label class="secici__etiket" for="gizleme" id="gizlemeEtiket"></label>
+          <select id="gizleme" class="secici"></select>
           <p class="ipucu" id="gizlemeNot"></p>
         </div>
         <label class="onay"><input type="checkbox" id="sadeceAktif" /> <span id="sadeceAktifEtiket"></span></label>
       </div>
     </section>
 
-    <section class="kart" style="margin-top:12px">
-      <h2 id="baslikVeri"></h2>
-      <p class="ipucu" id="veriNot"></p>
-      <div class="satir" style="margin-top:10px">
-        <button type="button" id="disaAktar" class="dugme"></button>
-        <select id="strateji" class="alan" style="max-width:260px"></select>
-        <button type="button" id="iceAktar" class="dugme dugme--ikincil"></button>
-        <input type="file" id="dosya" accept="application/json,.json" hidden />
+    <section class="panel katlanir" data-acik="false">
+      <button type="button" class="katlanir__baslik" aria-expanded="false" aria-controls="govdeVeri">
+        <span class="katlanir__ok" aria-hidden="true">▸</span>
+        <span class="katlanir__ad" id="baslikVeri"></span>
+        <span class="katlanir__ozet" id="ozetVeri"></span>
+      </button>
+      <div class="katlanir__govde yigin" id="govdeVeri" hidden>
+        <p class="ipucu" id="veriNot"></p>
+        <button type="button" id="disaAktar" class="btn btn--primary"></button>
+        <div class="toolbar">
+          <select id="strateji" class="ekle-secici"></select>
+          <button type="button" id="iceAktar" class="btn"></button>
+          <input type="file" id="dosya" accept="application/json,.json" hidden />
+        </div>
+        <p class="ipucu" id="iceUyari"></p>
       </div>
-      <p class="ipucu" id="iceUyari" style="margin-top:8px"></p>
     </section>
 
-    <div id="bildirim" class="durum" style="margin-top:10px"></div>
-
-    <section class="kart" style="margin-top:12px">
-      <h2 id="baslikHakkinda"></h2>
-      <p class="ipucu" id="hakkindaMetin" style="margin-top:6px"></p>
-      <div class="kv" style="margin-top:8px"><b id="surumEtiket"></b><span id="surum"></span></div>
-      <div class="kv"><b id="gelistiriciEtiket"></b><a href="https://dijitalturk.com" target="_blank" rel="noopener noreferrer">DijitalTurk.com</a></div>
+    <section class="panel katlanir" data-acik="false">
+      <button type="button" class="katlanir__baslik" aria-expanded="false" aria-controls="govdeHakkinda">
+        <span class="katlanir__ok" aria-hidden="true">▸</span>
+        <span class="katlanir__ad" id="baslikHakkinda"></span>
+        <span class="katlanir__ozet" id="ozetHakkinda"></span>
+      </button>
+      <div class="katlanir__govde yigin" id="govdeHakkinda" hidden>
+        <p class="ipucu" id="hakkindaMetin"></p>
+        <div>
+          <div class="kv"><b id="surumEtiket"></b><span id="surum"></span></div>
+          <div class="kv"><b id="gelistiriciEtiket"></b><a href="https://dijitalturk.com" target="_blank" rel="noopener noreferrer">DijitalTurk.com</a></div>
+        </div>
+      </div>
     </section>
   </div>
 
