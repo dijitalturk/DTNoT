@@ -104,24 +104,28 @@ const ISLER = {
     return { izin, kayitli, toplam: store.notlar.length, recovered: store.recovered };
   },
   async NOT_AL(m) {
-    const not = await S.notuAl(m.anahtar || m.url || '');
+    const not = await S.notuAl(m.id || m.anahtar || m.url || '');
     return { not: S.gorunurMu(not) ? not : null, ham: not };
   },
-  /** Sayfada ne gösterilecek: post-it + banner (site geneli kuralı depoda). */
-  async SAYFA_NOTU(m) {
+  /** Bu sayfada gösterilecek TÜM notlar (post-it · banner · footer · etiket). */
+  async SAYFA_NOTLARI(m) {
     const store = await S.hepsiniAl();
-    const s = S.sayfaNotu(store, m.url || m.anahtar || '');
-    return { postit: s.postit, banner: s.banner };
+    const s = S.sayfaNotlari(store, m.url || m.anahtar || '');
+    return {
+      anahtar: s.anahtar, tumu: s.tumu,
+      postit: s.postit, banner: s.banner, footer: s.footer, etiket: s.etiket,
+    };
   },
   async NOT_EKLE(m) {
     const ek = {};
     if (m.renk !== undefined) ek.renk = m.renk;
-    if (m.banner !== undefined) ek.banner = m.banner === true;
+    if (m.gorunum !== undefined) ek.gorunum = m.gorunum;
     if (m.siteGeneli !== undefined) ek.siteGeneli = m.siteGeneli === true;
+    if (m.konum !== undefined) ek.konum = m.konum;
     return { not: await S.ekle(m.url, m.metin, ek) };
   },
-  async NOT_GUNCELLE(m) { return { not: await S.guncelle(m.anahtar, m.patch || {}) }; },
-  async NOT_SIL(m) { return { anahtar: await S.sil(m.anahtar) }; },
+  async NOT_GUNCELLE(m) { return { not: await S.guncelle(m.id || m.anahtar, m.patch || {}) }; },
+  async NOT_SIL(m) { return { id: await S.sil(m.id || m.anahtar) }; },
   async NOTLAR() {
     const store = await S.hepsiniAl();
     return { notlar: store.notlar, recovered: store.recovered };
@@ -133,8 +137,8 @@ const ISLER = {
     return { ayarlar };
   },
   async SAYFA_AC(m) {
-    const not = await S.notuAl(m.anahtar);
-    const url = S.sayfaUrl(not) || ('https://' + String(m.anahtar || ''));
+    const not = await S.notuAl(m.id || m.anahtar);
+    const url = S.sayfaUrl(not) || ('https://' + String((not && not.anahtar) || m.anahtar || ''));
     try { await chrome.tabs.create({ url }); return { ok: true, url }; } catch (e) { return { ok: false, url }; }
   },
   async ICERIK_YENILE(m) {

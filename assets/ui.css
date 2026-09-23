@@ -1096,3 +1096,31 @@ html.db-acik .mesaj--hata { color: #b91c1c; }
 html.db-acik .pill--ok { color: #047857; }
 html.db-acik .pill--warn { color: #a16207; }
 html.db-acik .pill--danger { color: #b91c1c; }
+
+/* ---------- Görünüm seçici (post-it · banner · footer · etiket) ----------
+   Tek kaynak: görünüm listesi assets/store.js → GORUNUMLER. Karar CSS'te. */
+.tur-sec { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.tur-dugme {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px; border: 1px solid var(--db-border);
+  background: var(--db-surface-2); color: var(--db-muted);
+  padding: 4px 11px; font: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.tur-dugme:hover { color: var(--db-text); border-color: var(--db-border-strong); }
+.tur-dugme:focus-visible { outline: 3px solid var(--db-accent); outline-offset: 2px; }
+.tur-dugme[aria-pressed="true"] {
+  background: var(--db-accent-soft); border-color: rgba(16, 185, 129, 0.45); color: var(--db-accent-2);
+}
+html.db-acik .tur-dugme[aria-pressed="true"] { color: #047857; }
+
+/* ---------- Popup: “Bu sayfadaki notlar” kartları ---------- */
+.not-kart { border: 1px solid var(--db-border); border-radius: 12px; background: var(--db-surface-2); padding: 10px 11px; }
+.not-kart__ust { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.not-kart__yol { font-size: 10.5px; color: var(--db-dim); min-width: 0; }
+.not-kart__metin {
+  margin-top: 6px; font-size: 12.5px; color: var(--db-text);
+  white-space: pre-wrap; overflow-wrap: anywhere; max-height: 120px; overflow: auto;
+}
+.not-kart .not-alt { margin-top: 8px; }
+html.db-acik .not-kart { background: var(--db-surface); }
