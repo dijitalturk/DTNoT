@@ -1,4 +1,4 @@
-# AMO YÜKLEME FÖYÜ — DTNoT 0.3.2 (listelenmiş / public)
+# AMO YÜKLEME FÖYÜ — DTNoT 0.3.3 (listelenmiş / public)
 
 Bu dosya birebir kopyalanacak değerleri sırayla verir. Tahmin yok, hepsi hazır.
 **Kararlar:** Lisans = *Tüm hakları saklı* · Destek e-postası = `dtnot@dijitalturk.com` ·
@@ -10,7 +10,7 @@ Dağıtım = *On this site* (herkese açık listeleme).
 
 | Ne | Dosya |
 |---|---|
-| Yüklenecek paket | `dist/dtnot-0.3.2.zip` (**Firefox** paketi — `-chrome.zip` DEĞİL) |
+| Yüklenecek paket | `dist/dtnot-0.3.3.zip` (**Firefox** paketi — `-chrome.zip` DEĞİL) |
 | Ekran görüntüleri (1280×800) | `dist/magaza-popup.png`, `dist/magaza-icerik.png`, `dist/magaza-panel.png` |
 
 ---
@@ -32,7 +32,7 @@ Dağıtım = *On this site* (herkese açık listeleme).
 1. `https://addons.mozilla.org/tr/developers/` → **Firefox Hesabı ile giriş yap**.
 2. Sağ üstteki kullanıcı menüsü → **Uzantıları gönder veya yönet** → **Submit a New Add-on** →
    *Continue*.
-3. **Upload**: `dtnot-0.3.2.zip` dosyasını seç. AMO otomatik doğrular; sürümü `0.3.2`,
+3. **Upload**: `dtnot-0.3.3.zip` dosyasını seç. AMO otomatik doğrular; sürümü `0.3.3`,
    kimliği `dtnot@dijitalturk` olarak görür. (Doğrulama geçmiş olmalı: `web-ext lint` 0 hata/0 uyarı.)
 4. **Distribute**: **On this site** (listelenmiş) seç → *Continue*.
 5. Aşağıdaki §2 tablosundaki alanları doldur/ yapıştır. İnceleyici notları ve sürüm notları §3–§4.
@@ -104,9 +104,11 @@ dist/magaza-panel.png      → "Notlarım — siteye göre gruplu liste, arama, 
 
 ---
 
-## 3) Sürüm notları (Release notes — 0.3.2)
+## 3) Sürüm notları (Release notes — 0.3.3)
 
 ```
+Açıklama metni güncellendi: dört görünüm (post-it, banner, footer, etiket) + sayfa başına sınırsız not anlatımı.
+
 Notlar artık birbirinin üzerine binmiyor ve her görünümde düzenle/sil çalışıyor.
 
 • Sayfa başına SINIRSIZ not: her not kimlik taşır; bir sayfaya istediğin kadar not bırakabilirsin (eski kayıtlar okunurken taşınır, veri kaybı olmaz).
@@ -150,7 +152,7 @@ Teknik notlar:
 - Onaylanınca mağaza adresi şu kalıpta olur: `https://addons.mozilla.org/tr/firefox/addon/<slug>/`
   (slug büyük olasılıkla `dtnot`).
 - Sonraki sürümlerde aynı **Upload** akışı; sürüm numarasını artır (`0.3.3`, `0.4.0`…).
-- Chrome ve Edge'e yüklemek istediğinde: `dist/dtnot-0.3.2-chrome.zip` kullanılır (aynı metinler,
+- Chrome ve Edge'e yüklemek istediğinde: `dist/dtnot-0.3.3-chrome.zip` kullanılır (aynı metinler,
   aynı ekran görüntüleri).
 
 > ⚠️ `dtnot@dijitalturk.com` adresinin gerçekten e-posta aldığından emin ol — AMO adresi

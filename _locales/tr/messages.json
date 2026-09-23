@@ -4,7 +4,7 @@
     "description": "Eklenti adı (mağaza listelemesi)"
   },
   "appDesc": {
-    "message": "Gezindiğin web sayfalarına not bırak; aynı sayfaya döndüğünde notun sol altta post-it olarak karşına çıksın.",
+    "message": "Sayfalara not bırak: post-it, banner, footer, köşe etiketi. Sınırsız not, site geneli, sürükle-bırak. Notlar cihazında kalır.",
     "description": "Eklenti açıklaması (mağaza listelemesi)"
   },
   "ayarYeniSayfada": {
