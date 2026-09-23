@@ -572,6 +572,13 @@ await test('content.js: menü ve düzenleyici başlangıçta KAPALI (hidden)', (
   assert.match(contentKod, /menu\.hidden = true/, 'menü başlangıçta açık');
   assert.match(contentKod, /duzenKap\.hidden = true/, 'düzenleyici başlangıçta açık');
 });
+await test('content.js: etiket menüsü DOĞRUDAN karta girer (gizli sarmalayıcı yok)', () => {
+  // "Minik boş alan açılıyor" hatası: menü, görünürlüğü yönetilmeyen hidden bir sarmalayıcının
+  // içinde kalıyordu → kart açılıyor, içi boş görünüyordu (gerçek Chromium'da ölçüldü).
+  assert.match(contentKod, /disKap\.appendChild\(menu\.menu\)/, 'menü doğrudan karta eklenmiyor');
+  assert.ok(!/menuKap/.test(contentKod), 'gizli menü sarmalayıcısı (menuKap) geri gelmiş');
+  assert.match(contentKod, /\.serit \.menu \{ align-self: flex-end; min-width: 170px; \}/, 'şerit menüsü derli toplu değil');
+});
 await test('content.js: yeniden çizim imzası konumu DIŞLAR (sürükleme sırasında zıplama yok)', () => {
   assert.match(contentKod, /function notImzasi/);
   const blok = contentKod.match(/function notImzasi[\s\S]{0,600}?\}/);
