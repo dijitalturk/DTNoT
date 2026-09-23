@@ -47,6 +47,7 @@ DTNoT lets you drop quick notes on any web page and see them exactly where you l
 • 6 colours and instant editing: use the ✎ menu on any note to edit in place or delete it.
 • Notes never overlap: a new note sits to the right of the existing one (below in banners/footers,
   above in corner tags).
+• Drag and drop: move sticky notes anywhere on the page; the position is remembered.
 • "My notes" screen: grouped by site, search, colour filter, open page, JSON backup.
 • Turkish and English interface, dark/light theme.
 
