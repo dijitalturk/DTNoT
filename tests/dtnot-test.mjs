@@ -469,6 +469,15 @@ await test('popup: genişlik artırıldı (448px) + alt bağlantı var', () => {
   assert.match(html, /<svg/, 'bağlantı ikonu (svg) yok');
   assert.match(html, /id="renkSecili"/, 'seçili renk etiketi yok');
 });
+await test('ui.css: üst bar ikonları bayraklarla AYNI ölçüde (34×30, flex:none)', () => {
+  const css = oku('assets/ui.css');
+  const blok = css.match(/\.topbar__sag \.ikon-dugme[\s\S]{0,420}?\}/);
+  assert.ok(blok, 'üst bar ikon kutusu kuralı yok');
+  assert.match(blok[0], /flex:\s*none/, 'ikonlar flex:none değil (sıkışabilir)');
+  assert.match(blok[0], /width:\s*34px/, 'ikon genişliği bayrakla eşit değil');
+  assert.match(blok[0], /height:\s*30px/, 'ikon yüksekliği bayrakla eşit değil');
+  assert.match(blok[0], /\.topbar__sag \.dil-dugme/, 'bayrak düğmesi de aynı kutuya alınmalı');
+});
 await test('popup.js: panel/ayarlar açılınca popup kapanıyor', () => {
   const kod = oku('popup.js');
   assert.match(kod, /async function sekmeAc[\s\S]{0,400}window\.close\(\)/, 'window.close() yok');

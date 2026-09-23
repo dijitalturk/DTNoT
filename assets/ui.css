@@ -995,6 +995,26 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 .dil-dugme:hover { background: rgba(255, 255, 255, 0.07); color: var(--db-text); }
 .dil-dugme[aria-pressed="true"] { border-color: var(--db-accent); background: var(--db-accent-soft); }
 
+/* ---------- Üst bar ikon kutusu: bayraklarla AYNI ölçü ----------
+   Kural: .topbar__sag içindeki ikon düğmeleri (Notlarım · Ayarlar) bayrak
+   düğmesiyle eşit kutuda olur (34×30) ve `flex: none` ile asla sıkışmaz /
+   alt satıra kaymaz. Bayraklar için geçerli ölçünün aynısı ikonlara uygulanır. */
+.topbar__sag .ikon-dugme,
+.topbar__sag .dil-dugme {
+  flex: none;
+  width: 34px;
+  height: 30px;
+  min-width: 34px;
+  min-height: 30px;
+  font-size: 16px;
+}
+/* Popup içinde Ayarlar görünümü açıkken ikon düğmesi “etkin” görünür. */
+.topbar__sag .ikon-dugme[aria-pressed="true"] {
+  background: var(--db-accent-soft);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--db-text);
+}
+
 /* ---------- Renk seçici / renk noktası ----------
    Post-it paleti VERİDİR (assets/store.js → PALET). JS yalnızca --renk-bg /
    --renk-kenar değişkenlerini yazar; renk kararı CSS'te kalır. */
