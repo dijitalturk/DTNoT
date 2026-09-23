@@ -17,6 +17,18 @@ Dağıtım = *On this site* (herkese açık listeleme).
 
 ## 1) Akış (6 adım)
 
+> ⚠️ **ÖNEMLİ:** `dtnot@dijitalturk` kimliği AMO'da **zaten kayıtlı** (daha önce kendi kullanımın için
+> yüklediğin sürümden). Bu yüzden "Submit a New Add-on" formu **"Duplicate extension ID detected"**
+> hatası verir. Doğru yol: **yeni eklenti gönderme** → mevcut kaydın sayfasından **"Upload New
+> Version"** (yeni sürüm yükle).
+>
+> - Kayıt **listelenmiş (On this site)** ise: yeni sürüm yüklersin, onaydan sonra mağaza sayfasında
+>   görünür. Mağaza metinleri/görselleri için "Edit Product Page" kullanılır.
+> - Kayıt **kendi dağıtımın (unlisted / On your own site)** ise: AMO yayın türünü sonradan
+>   değiştirmez. Herkese açık listeleme istiyorsan **yeni bir kimlikle** (`dtnot@dijitalturk.com`)
+>   yeni eklenti olarak gönderilir. Yeni kimlik = boş depo; notları taşımak için eski sürümde
+>   *Ayarlar → JSON indir*, yeni sürümde *içe aktar*.
+
 1. `https://addons.mozilla.org/tr/developers/` → **Firefox Hesabı ile giriş yap**.
 2. Sağ üstteki kullanıcı menüsü → **Uzantıları gönder veya yönet** → **Submit a New Add-on** →
    *Continue*.
