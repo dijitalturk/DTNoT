@@ -194,6 +194,13 @@ await test('t(): değişken yerleştirme ve dil düşüşü çalışır', () => 
   assert.equal(I.t('panel.toplam', { n: 3 }), '3 not');
   assert.equal(I.t('yok.boyle.anahtar'), 'yok.boyle.anahtar');
 });
+await test('_locales: TR/EN messages.json anahtar kümeleri aynı (mağaza metinleri)', () => {
+  const tr = JSON.parse(oku('_locales/tr/messages.json'));
+  const en = JSON.parse(oku('_locales/en/messages.json'));
+  assert.deepEqual(Object.keys(tr).sort(), Object.keys(en).sort(), 'TR/EN mağaza sözlükleri ayrışmış');
+  assert.equal(tr.ayarYeniSayfada.message, 'Yeni sayfada aç');
+  assert.equal(en.ayarYeniSayfada.message, 'Open in new tab');
+});
 
 /* ================= 3) Mesajlaşma deseni (Chrome + Firefox) ================= */
 console.log('\n3) Mesajlaşma deseni');
@@ -478,10 +485,33 @@ await test('ui.css: üst bar ikonları bayraklarla AYNI ölçüde (34×30, flex:
   assert.match(blok[0], /height:\s*30px/, 'ikon yüksekliği bayrakla eşit değil');
   assert.match(blok[0], /\.topbar__sag \.dil-dugme/, 'bayrak düğmesi de aynı kutuya alınmalı');
 });
-await test('popup.js: panel/ayarlar açılınca popup kapanıyor', () => {
+await test('popup.js: YALNIZ panel (Notlarım) yeni sekmede açılıp popup kapanıyor', () => {
   const kod = oku('popup.js');
   assert.match(kod, /async function sekmeAc[\s\S]{0,400}window\.close\(\)/, 'window.close() yok');
+  assert.match(kod, /\$\('panelAc'\)\.addEventListener\('click', \(\) => sekmeAc\('panel\.html'\)\)/, 'panel yeni sekmede açılmıyor');
+  assert.ok(!/sekmeAc\('options\.html'\)/.test(kod), 'Ayarlar hâlâ sekme açıp popup’ı kapatıyor');
   assert.match(kod, /renkSecili.*not\.renkSecili|not\.renkSecili/, 'seçili renk etiketi güncellenmiyor');
+});
+await test('popup: Ayarlar POPUP İÇİNDE açılıyor (yeni pencere/sekme yok, popup kapanmaz)', () => {
+  const html = oku('popup.html');
+  const kod = oku('popup.js');
+  assert.match(html, /id="ayarKutu"[\s\S]{0,200}?hidden/, 'popup içinde kapalı Ayarlar bölümü yok');
+  assert.match(html, /id="gizleme" class="secici"/, 'popup’ta gizleme süresi seçicisi yok');
+  assert.match(html, /id="sadeceAktif"/, 'popup’ta Notlarım davranışı onayı yok');
+  assert.match(html, /id="ayarAc"[^>]*aria-pressed="false"/, 'Ayarlar düğmesi etkin durumu bildirmiyor');
+  assert.match(kod, /async function ayarModu[\s\S]{0,400}\$\('ayarKutu'\)\.hidden = !ac/, 'ayarModu bölümü açmıyor');
+  assert.match(kod, /\$\('ayarAc'\)\.addEventListener\('click', \(\) => ayarModu\(/, 'Ayarlar düğmesi popup içi görünümü açmıyor');
+  assert.match(kod, /S\.ayarlariKaydet\(\{ gizlemeSaat: yeni \}\)/, 'gizleme süresi kaydedilmiyor');
+  assert.match(kod, /S\.ayarlariKaydet\(\{ sadeceAktif: e\.target\.checked \}\)/, 'Notlarım davranışı kaydedilmiyor');
+});
+await test('popup: “Yeni sayfada aç” bağlantısı openOptionsPage + tabs.create yedeği', () => {
+  const html = oku('popup.html');
+  const kod = oku('popup.js');
+  assert.match(html, /id="yeniSayfadaAc" class="altbilgi__link"/, 'standart .altbilgi__link sınıfı yok');
+  assert.match(html, /href="options\.html"/, 'tam ayar sayfası bağlantısı yok');
+  assert.match(kod, /runtime\.openOptionsPage\(\)/, 'openOptionsPage kullanılmıyor');
+  assert.match(kod, /tabs\.create\(\{ url: rt\.getURL\('options\.html'\) \}\)/, 'tabs.create yedeği yok');
+  assert.match(kod, /\$\('yeniSayfadaAc'\)\.addEventListener\('click',[\s\S]{0,140}e\.preventDefault\(\)/, 'bağlantı varsayılan davranışa bırakılmış (çift sekme riski)');
 });
 await test('content.js: banner sayfayı aşağı ittiriyor (üstüne binmiyor)', () => {
   const kod = oku('content.js');

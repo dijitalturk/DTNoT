@@ -90,6 +90,7 @@
       'ayar.hakkinda': 'Hakkında',
       'ayar.hakkindaMetin': 'DTNoT gizliliğine önem verir; hiçbir veriniz dışarı sızdırılmaz, tüm notlarınız kişisel bilgisayarınızda kalır.',
       'ayar.gelistirici': 'Geliştirici: DijitalTurk.com',
+      'ayar.yeniSayfada': 'Yeni sayfada aç',
 
       'icerik.gizle': 'Notu gizle',
       'icerik.gizleSure': 'Notu {s} gizle',
@@ -183,6 +184,7 @@
       'ayar.hakkinda': 'About',
       'ayar.hakkindaMetin': 'DTNoT cares about your privacy: none of your data is leaked anywhere, and all your notes stay on your personal computer.',
       'ayar.gelistirici': 'Developer: DijitalTurk.com',
+      'ayar.yeniSayfada': 'Open in new tab',
 
       'icerik.gizle': 'Hide note',
       'icerik.gizleSure': 'Hide note for {s}',
