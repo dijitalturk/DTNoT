@@ -72,6 +72,12 @@
     g.value = gSecili;
   }
 
+  /** Toplam not sayısı (Veri bölümü özeti) — arka planın NOTLAR yanıtından (panel ile aynı yol). */
+  async function notSayisiAl() {
+    const r = await cagri('NOTLAR');
+    return (r && r.notlar) ? r.notlar.length : 0;
+  }
+
   /** Katlanır bölümler (standart .katlanir): başlık tıklanınca gövde açılır/kapanır.
       Gövde DOM'dan SİLİNMEZ; yalnız `hidden` + data-acik değişir (otomasyon/arama bozulmaz). */
   function katlanirlariKur() {
@@ -117,7 +123,7 @@
     await I.hazirla();
     const ayarlar = await S.ayarlariAl();
     durum.ayarlar = ayarlar;
-    try { durum.sayi = (await S.hepsiniAl()).length; } catch (e) { durum.sayi = 0; }
+    durum.sayi = await notSayisiAl();
     etiketle();
     ozetYaz();
     katlanirlariKur();
@@ -157,7 +163,7 @@
       if (strateji === 'replace' && !window.confirm(T('ayar.iceUyari'))) return;
       const r = await cagri('ICE_AKTAR', { json: metin, strateji: strateji });
       if (!r) { bildir(T('ayar.iceHata'), 'hata'); return; }
-      try { durum.sayi = (await S.hepsiniAl()).length; } catch (err) { /* özet sayısı eski kalır */ }
+      try { durum.sayi = await notSayisiAl(); } catch (err) { /* özet sayısı eski kalır */ }
       ozetYaz();
       bildir(T('ayar.iceOk', { n: r.sayi }), 'tamam');
     });
