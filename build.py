@@ -17,7 +17,8 @@ import zipfile
 
 KOK = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(KOK, 'dist')
-HARIC_DIR = {'tests', 'dist', 'node_modules', '.git', '.github', 'docs', 'gelen-kaynak', 'gelen-dist'}
+HARIC_DIR = {'tests', 'dist', 'node_modules', '.git', '.github', 'docs', 'gelen-kaynak', 'gelen-dist',
+             'web'}  # 'web' = dijitalturk.com tanıtım sayfası kaynağı; eklenti paketine girmez
 HARIC_UZANTI = ('.py', '.pyc', '.md', '.log', '.tsbuildinfo')
 
 
