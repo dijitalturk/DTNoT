@@ -1,4 +1,4 @@
-# AMO YÜKLEME FÖYÜ — DTNoT 0.3.3 (listelenmiş / public)
+# AMO YÜKLEME FÖYÜ — DTNoT 0.3.4 (listelenmiş / public)
 
 Bu dosya birebir kopyalanacak değerleri sırayla verir. Tahmin yok, hepsi hazır.
 **Kararlar:** Lisans = *Tüm hakları saklı* · Destek e-postası = `dtnot@dijitalturk.com` ·
@@ -10,32 +10,36 @@ Dağıtım = *On this site* (herkese açık listeleme).
 
 | Ne | Dosya |
 |---|---|
-| Yüklenecek paket | `dist/dtnot-0.3.3.zip` (**Firefox** paketi — `-chrome.zip` DEĞİL) |
+| Yüklenecek paket | `dist/dtnot-0.3.4.zip` (**Firefox** paketi — `-chrome.zip` DEĞİL) |
 | Ekran görüntüleri (1280×800) | `dist/magaza-popup.png`, `dist/magaza-icerik.png`, `dist/magaza-panel.png` |
 
 ---
 
 ## 1) Akış (6 adım)
 
-> ⚠️ **ÖNEMLİ:** `dtnot@dijitalturk` kimliği AMO'da **zaten kayıtlı** (daha önce kendi kullanımın için
+> ⚠️ **ÖNEMLİ 1 —** `dtnot@dijitalturk` kimliği AMO'da **zaten kayıtlı** (daha önce kendi kullanımın için
 > yüklediğin sürümden). Bu yüzden "Submit a New Add-on" formu **"Duplicate extension ID detected"**
-> hatası verir. Doğru yol: **yeni eklenti gönderme** → mevcut kaydın sayfasından **"Upload New
-> Version"** (yeni sürüm yükle).
+> hatası verir. Doğru yol: mevcut kaydın sayfasından **"Upload New Version"** (yeni sürüm yükle).
 >
-> - Kayıt **listelenmiş (On this site)** ise: yeni sürüm yüklersin, onaydan sonra mağaza sayfasında
->   görünür. Mağaza metinleri/görselleri için "Edit Product Page" kullanılır.
-> - Kayıt **kendi dağıtımın (unlisted / On your own site)** ise: AMO yayın türünü sonradan
->   değiştirmez. Herkese açık listeleme istiyorsan **yeni bir kimlikle** (`dtnot@dijitalturk.com`)
->   yeni eklenti olarak gönderilir. Yeni kimlik = boş depo; notları taşımak için eski sürümde
->   *Ayarlar → JSON indir*, yeni sürümde *içe aktar*.
+> ⚠️ **ÖNEMLİ 2 — Kanal değiştirme.** Kayıt şu an hem dış API'de (mağaza sayfası 404, aramada yok) hem de
+> büyük olasılıkla dev-panelinde **"On your own" (unlisted)** kanalında görünüyor. Bu kanalda "onay"
+> yalnızca *senin için imzalandı* demektir; mağazada **hiç** görünmez. Listelenmişe geçiş:
+> **Upload New Version** sayfasında **"Where to Host Version"** başlığının altındaki
+> **"Change"** bağlantısı → açılan **"How to Distribute this Version"** sayfasında **"On this site"** →
+> *Continue* → sonra dosyayı yükle. (Radyo, yükleme formunda satır içi çıkmaz; hep bu "Change"
+> bağlantısının arkasındadır — kod: `devhub/addons/submit/upload.html` → `devhub.submit.version.distribution`.)
+> - **"Change" bağlantısı hiç görünmüyorsa** ve sayfa *"On your own is the only distribution method
+>   available"* diyorsa: eklenti **"Invisible"** yapılmış ya da **listeleme reddedilmiş** (status=rejected)
+>   demektir. Kod (`can_submit_listed_versions`) bu iki durumda listelenmiş sürümü kapatır; önce o durum
+>   düzeltilmelidir.
 
 1. `https://addons.mozilla.org/tr/developers/` → **Firefox Hesabı ile giriş yap**.
-2. Sağ üstteki kullanıcı menüsü → **Uzantıları gönder veya yönet** → **Submit a New Add-on** →
-   *Continue*.
-3. **Upload**: `dtnot-0.3.3.zip` dosyasını seç. AMO otomatik doğrular; sürümü `0.3.3`,
+2. Sağ üstteki kullanıcı menüsü → **Uzantıları gönder veya yönet** → DTNoT satırı →
+   **Upload New Version** (yeni sürüm yükle). *"Submit a New Add-on" formu KULLANILMAZ.*
+3. **Where to Host Version** başlığı → **Change** → **"On this site"** seç → *Continue*.
+4. **Upload**: `dtnot-0.3.4.zip` dosyasını seç. AMO otomatik doğrular; sürümü `0.3.4`,
    kimliği `dtnot@dijitalturk` olarak görür. (Doğrulama geçmiş olmalı: `web-ext lint` 0 hata/0 uyarı.)
-4. **Distribute**: **On this site** (listelenmiş) seç → *Continue*.
-5. Aşağıdaki §2 tablosundaki alanları doldur/ yapıştır. İnceleyici notları ve sürüm notları §3–§4.
+5. Aşağıdaki §2 tablosundaki alanları doldur/yapıştır. İnceleyici notları ve sürüm notları §3–§4.
 6. **Submit version** → Mozilla incelemesi başlar. Onaylanınca mağaza sayfası yayına girer.
 
 > İnceleme genelde otomatik doğrulama + insan incelemesi; sıra 1–3 gün sürebilir.
