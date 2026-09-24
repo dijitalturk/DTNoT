@@ -1,0 +1,120 @@
+<style>
+.giz-ozet{background:radial-gradient(at 0 0,#a2edac12,#0000 60%),#101612;border:1px solid #a2edac2e;border-radius:18px;padding:26px;margin:0 0 30px}
+.giz-ozet p{margin:0;font-size:17px;line-height:1.85;color:#d9e9de}
+.giz-ozet p strong{color:#eff8f1}
+.giz-rozetler{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.giz-rozet{font:11px/1.4 var(--font-mono,monospace);color:#a2edac;background:#a2edac0f;border:1px solid #a2edac29;border-radius:999px;padding:6px 12px}
+.giz-akis{display:grid;gap:14px;margin:30px 0}
+@media(min-width:760px){.giz-akis{grid-template-columns:repeat(3,1fr)}}
+.giz-adim{background:#101612;border:1px solid #ffffff1a;border-radius:16px;padding:20px}
+.giz-adim .giz-no{display:inline-block;font:11px/1.4 var(--font-mono,monospace);color:#a2edac;border:1px solid #a2edac33;border-radius:999px;padding:3px 10px}
+.giz-adim h3{margin:14px 0 8px;font-size:18px;color:#eff3ed;font-weight:500}
+.giz-adim p{margin:0;font-size:15px;line-height:1.7;color:#98a49b}
+.giz-icindekiler{background:#0d1210;border:1px solid #ffffff14;border-radius:18px;padding:24px 26px;margin:30px 0}
+.giz-icindekiler .eyebrow{margin-bottom:10px}
+.giz-icindekiler ol{margin:0;padding-left:22px;columns:2;column-gap:30px}
+@media(max-width:700px){.giz-icindekiler ol{columns:1}}
+.giz-icindekiler li{font-size:15px;line-height:1.9;margin:0 0 4px}
+.giz-icindekiler a{text-decoration:none;border-bottom:1px solid #a2edac40}
+.giz-icindekiler a:hover{border-bottom-color:#a2edac}
+.prose h2{scroll-margin-top:96px}
+.giz-tablo{width:100%;border-collapse:collapse;margin:22px 0 8px}
+.giz-tablo th{background:#0d1210;color:#c8e8d1;font-weight:500;text-align:left}
+.giz-tablo th,.giz-tablo td{vertical-align:top}
+.giz-tablo code{color:#a2edac;background:#a2edac0f;border:1px solid #a2edac1f;border-radius:5px;padding:1px 6px;font-size:13px}
+.giz-iletisim{display:flex;flex-wrap:wrap;align-items:center;gap:14px;background:#101612;border:1px solid #ffffff1a;border-radius:18px;padding:24px;margin:26px 0}
+.giz-iletisim p{margin:0;flex:1 1 260px;font-size:15px;line-height:1.7;color:#b3c4b8}
+.giz-kapsam{font-size:14px;line-height:1.8;color:#8fa094;border-top:1px solid #24382b;padding-top:18px;margin-top:30px}
+</style>
+
+<div class="giz-ozet">
+  <p><strong>DTNoT hiçbir kişisel veri toplamaz, sunucuya göndermez, satmaz veya üçüncü taraflarla paylaşmaz.</strong> Notlarınız yalnızca kendi tarayıcınızda ve kendi cihazınızda saklanır. Hesap, üyelik veya giriş yoktur; eklenti internet üzerinden hiçbir istek yapmaz.</p>
+  <div class="giz-rozetler"><span class="giz-rozet">SUNUCU YOK</span><span class="giz-rozet">HESAP YOK</span><span class="giz-rozet">ANALİTİK YOK</span><span class="giz-rozet">REKLAM YOK</span><span class="giz-rozet">VERİ SATIŞI YOK</span></div>
+</div>
+
+<div class="giz-akis">
+  <div class="giz-adim"><span class="giz-no">01</span><h3>Siz yazarsınız</h3><p>Notu oluşturduğunuzda metin, renk ve görünüm bilgisi oluşur.</p></div>
+  <div class="giz-adim"><span class="giz-no">02</span><h3>Cihazınızda saklanır</h3><p>Her şey tarayıcının eklentiye özel yerel deposunda tutulur; tarayıcı hesabınızla eşitlenmez.</p></div>
+  <div class="giz-adim"><span class="giz-no">03</span><h3>Başka hiçbir yere gitmez</h3><p>Sunucuya aktarım, üçüncü taraf paylaşımı veya izleme yoktur.</p></div>
+</div>
+
+<div class="giz-icindekiler">
+  <span class="eyebrow">// İÇİNDEKİLER</span>
+  <ol>
+    <li><a href="#islenen">Hangi bilgiler işlenir?</a></li>
+    <li><a href="#saklama">Veriler nerede saklanır?</a></li>
+    <li><a href="#toplama">Veri toplama, iletme ve paylaşma</a></li>
+    <li><a href="#izinler">İstenen izinler ve gerekçeleri</a></li>
+    <li><a href="#icerik">Sayfa içeriğine erişim</a></li>
+    <li><a href="#gizli">Gizli (incognito) mod</a></li>
+    <li><a href="#kontrol">Silme, yedekleme, taşıma</a></li>
+    <li><a href="#cocuklar">Çocukların gizliliği</a></li>
+    <li><a href="#degisiklik">Değişiklikler</a></li>
+    <li><a href="#iletisim">İletişim</a></li>
+  </ol>
+</div>
+
+<h2 id="islenen">1. Hangi bilgiler işlenir?</h2>
+<p>Yalnızca sizin oluşturduğunuz notlar ve notun doğru yerde gösterilebilmesi için gereken teknik bilgiler cihazınızda işlenir:</p>
+<ul>
+  <li><strong>Not metni</strong> — yazdığınız içerik.</li>
+  <li><strong>Görünüm ve renk</strong> — post-it, banner, footer veya köşe etiketi seçiminiz ile notun rengi ve sayfadaki konumu.</li>
+  <li><strong>Site ve sayfa adresi</strong> — notun ait olduğu site (örn. <code>sahibinden.com</code>) ve not “site geneli” işaretlenmediyse sayfanın adresi.</li>
+  <li><strong>Not durumu</strong> — “site geneli” işareti, gizleme durumu ve tarih bilgileri.</li>
+  <li><strong>Arayüz tercihleri</strong> — dil, tema ve “gizle” süresi.</li>
+</ul>
+<p>Bu bilgiler yalnızca notunuzu doğru sayfada, doğru görünümle göstermek için kullanılır; başka bir amaçla kullanılmaz.</p>
+
+<h2 id="saklama">2. Veriler nerede saklanır?</h2>
+<p>Tüm veriler tarayıcının eklentiye özel yerel deposunda (<code>chrome.storage.local</code>) tutulur. Bu depo cihazınızda bulunur, tarayıcı hesabınızla senkronize edilmez ve DijitalTurk’ün erişebileceği bir sunucuda not kopyası tutulmaz.</p>
+
+<h2 id="toplama">3. Veri toplama, iletme ve paylaşma yoktur</h2>
+<ul>
+  <li>Sunucu, veritabanı veya kullanıcı hesabı <strong>yoktur</strong>.</li>
+  <li>Analitik, çökme raporu, kullanım istatistiği, reklam veya izleme aracı <strong>yoktur</strong>.</li>
+  <li>Eklenti hiçbir ağ isteği (fetch / XMLHttpRequest / WebSocket / beacon) <strong>yapmaz</strong> — bu, yayınlanan paketin kaynak kodunda doğrulanabilir.</li>
+  <li>Hiçbir veri satılmaz, kiralanmaz veya üçüncü taraflarla paylaşılmaz.</li>
+  <li>Notlar cihazınızdan çıkmadığı için veri aktarımı, paylaşımı veya yurt dışına transfer söz konusu değildir.</li>
+</ul>
+
+<h2 id="izinler">4. İstenen izinler ve gerekçeleri</h2>
+<table class="giz-tablo">
+  <thead><tr><th>İzin</th><th>Neden gerekli?</th></tr></thead>
+  <tbody>
+    <tr><td><code>storage</code></td><td>Notlarınızı ve tercihlerinizi cihazınızda saklamak.</td></tr>
+    <tr><td><code>activeTab</code></td><td>Not eklemek veya düzenlemek için yalnızca o an açık olan sekmeye erişmek. Kurulumda geniş izin istenmez; erişim sizin işleminizle verilir.</td></tr>
+    <tr><td><code>scripting</code></td><td>Notun sayfada görünebilmesi için arayüzü geçerli sayfaya yerleştirmek.</td></tr>
+    <tr><td><code>contextMenus</code></td><td>Sağ tık menüsüne “Not ekle” kısayolunu eklemek.</td></tr>
+    <tr><td>Sayfa erişimi<br>(http / https)</td><td>Notların ilgili sitelerde gösterilebilmesi. Eklenti sayfa içeriğini okumaz, kopyalamaz, kaydetmez veya iletmez; yalnızca kendi not katmanını yerleştirir.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="icerik">5. Sayfa içeriğine erişim</h2>
+<p>DTNoT; ziyaret ettiğiniz sayfanın metnini, formlarını, giriş bilgilerini, resimlerini veya çerezlerini okumaz ve kaydetmez. Sayfaya eklediği tek şey sizin oluşturduğunuz nottur.</p>
+<p>Notlarınızın alt köşesinde <strong>dijitalturk.com</strong> bağlantısı bulunur; tıklarsanız tarayıcınız o siteyi açar. Bu, eklentinin veri aktardığı anlamına gelmez.</p>
+
+<h2 id="gizli">6. Gizli (incognito) mod</h2>
+<p>Gizli modda kullanım tarayıcınızın kendi ayarına bağlıdır. Kullanılsa bile notlar yine yalnızca cihazınızda saklanır.</p>
+
+<h2 id="kontrol">7. Kontrol sizde: silme, yedekleme, taşıma</h2>
+<ul>
+  <li><strong>Notu silme:</strong> herhangi bir notun ✎ menüsünden.</li>
+  <li><strong>Tüm verileri silme:</strong> eklentiyi kaldırmak, tarayıcıdaki eklenti verilerini silmek veya site verilerini tarayıcı ayarlarından temizlemek yeterlidir; bu durumda tüm notlar silinir.</li>
+  <li><strong>Yedekleme ve taşıma:</strong> Ayarlar bölümünden “JSON indir” ile dilediğiniz an yedek alabilir, başka bir cihazda içe aktarabilirsiniz.</li>
+</ul>
+
+<h2 id="cocuklar">8. Çocukların gizliliği</h2>
+<p>Eklenti hiçbir kişisel veri toplamadığı için çocuklardan da veri toplamaz; yaş doğrulaması gerektiren bir işlev yoktur.</p>
+
+<h2 id="degisiklik">9. Değişiklikler</h2>
+<p>Bu politika güncellendiğinde sayfadaki “Son güncelleme” tarihi ve sürüm numarası değişir; önemli değişiklikler mağaza sürüm notlarında duyurulur.</p>
+
+<h2 id="iletisim">10. İletişim</h2>
+<div class="giz-iletisim">
+  <p>Sorularınız ve talepleriniz için bize yazabilirsiniz: <strong>dtnot@dijitalturk.com</strong></p>
+  <a class="button" href="mailto:dtnot@dijitalturk.com">E-posta gönder ↗︎</a>
+  <a class="text-link" href="https://dijitalturk.com/dtnot/">Uygulama sayfası ↗︎</a>
+</div>
+
+<p class="giz-kapsam"><strong>Kapsam notu:</strong> Bu politika yalnızca DTNoT tarayıcı eklentisini kapsar. <a href="https://dijitalturk.com/veysel/dijitalturk-gizlilik-politikasi/">dijitalturk.com</a> sitesinin kendi sayfaları için site gizlilik politikası geçerlidir.</p>
+<p class="giz-kapsam"><strong>Son güncelleme:</strong> 24 Eylül 2026 · <strong>Eklenti sürümü:</strong> 0.3.3 · <strong>Geliştirici:</strong> DijitalTurk</p>
