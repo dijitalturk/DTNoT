@@ -34,9 +34,11 @@
 .dtnot-sss .tool-help { font-size: 16.5px; }
 .dtnot-not p { font-size: 16.5px; }
 
-/* kapak görseli */
-.dtnot-marka { margin: 26px auto 0; max-width: 820px; border: 1px solid #ffffff1a; border-radius: 18px; background: #101612; overflow: hidden; }
-.dtnot-marka img { display: block; width: 100%; height: auto; max-height: none; margin: 0; border-radius: 0; }
+/* kahraman: yazı solda, kapak görseli sağda */
+.dtnot-kahraman { display: grid; gap: 26px; align-items: center; }
+@media (min-width: 880px) { .dtnot-kahraman { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
+.dtnot-kahraman-gorsel { margin: 0; border: 1px solid #ffffff1a; border-radius: 18px; background: #101612; overflow: hidden; }
+.dtnot-kahraman-gorsel img { display: block; width: 100%; height: auto; max-height: none; margin: 0; border-radius: 0; }
 
 /* mağaza butonu + animasyonlu indirme ikonu */
 .dtnot-indir { display: inline-flex; align-items: center; }
@@ -91,22 +93,21 @@
 <main id="main" class="shell py-9 md:py-12">
 <nav class="mb-6 text-xs text-[#98a49b]" aria-label="Sayfa yolu"><ol class="flex flex-wrap items-center gap-2"><li><a class="hover:text-lime" href="/">Ana sayfa</a></li><li aria-hidden="true" class="text-[#52665a]">/</li><li><a class="hover:text-lime" href="/#apps">Uygulamalar</a></li><li aria-hidden="true" class="text-[#52665a]">/</li><li aria-current="page" class="text-[#c2d4c7]">DTNoT</li></ol></nav>
 
-<div class="tool-intro">
+<div class="dtnot-kahraman">
   <div>
     <span class="eyebrow">// SAYFALARA NOT BIRAK</span>
     <h1 class="mt-3 text-5xl font-medium tracking-tight">DTNo<span class="text-lime">T<span class="font-mono">_</span></span></h1>
     <p class="mt-2 text-[#d0ded4]">Gezindiğin sayfalara not bırak. Notun tam bıraktığın yerde seni bekler.</p>
-    <p class="mt-2 text-[#829487]"><strong class="font-medium text-[#c2d4c7]">Bir tarayıcı eklentisidir:</strong> tarayıcınıza eklenir, araç çubuğunda durur ve gezindiğiniz sayfanın üzerine not bırakmanızı sağlar. Ayrı bir program kurulmaz.</p>
+    <p class="mt-3 text-[#829487]"><strong class="font-medium text-[#c2d4c7]">Bir tarayıcı eklentisidir:</strong> tarayıcınıza eklenir, araç çubuğunda durur ve gezindiğiniz sayfanın üzerine not bırakmanızı sağlar. Ayrı bir program kurulmaz.</p>
+    <p class="mt-5"><span class="tool-local">↳ Notların cihazında kalır</span></p>
   </div>
-  <span class="tool-local">↳ Notların cihazında kalır</span>
+  <figure class="dtnot-kahraman-gorsel">
+    <button class="dtnot-buyut" type="button" aria-label="Görseli büyüt: DTNoT kapak görseli">
+      <img src="img/marka.webp" width="1065" height="629" fetchpriority="high" alt="DTNoT — sayfalara not bırak: yeşil post-it, kalkan motifi ve dijitalturk.com">
+      <span class="buyut" aria-hidden="true">Büyüt</span>
+    </button>
+  </figure>
 </div>
-
-<figure class="dtnot-marka">
-  <button class="dtnot-buyut" type="button" aria-label="Görseli büyüt: DTNoT kapak görseli">
-    <img src="img/marka.webp" width="1065" height="629" fetchpriority="high" alt="DTNoT — sayfalara not bırak: yeşil post-it, kalkan motifi ve dijitalturk.com">
-    <span class="buyut" aria-hidden="true">Büyüt</span>
-  </button>
-</figure>
 
 <section class="tool-panel mt-6">
   <h2><span>01</span> Nereden kurulur?</h2>
