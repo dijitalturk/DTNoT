@@ -342,6 +342,7 @@
     const k = bulId(store, id);
     if (!k) throw new Error('kayit-yok');
     const p = Object.assign({}, patch || {});
+    if ('metin' in p && !String(p.metin == null ? '' : p.metin).trim()) throw new Error('metin-gerekli');
     if ('metin' in p) k.metin = String(p.metin == null ? '' : p.metin).slice(0, METIN_MAX);
     if ('renk' in p) k.renk = temizRenk(p.renk);
     if ('gorunum' in p) k.gorunum = temizGorunum(p.gorunum, p.banner === true);

@@ -153,6 +153,14 @@ await test('sil: kayıt yoksa hata, varsa KİMLİKLE siler', async () => {
   assert.equal(kalan.length, 1);
   assert.equal(kalan[0].metin, 'kalacak');
 });
+await test('guncelle: boş metin kayıtlı notu silemez', async () => {
+  depoBosalt();
+  const n = await S.ekle('https://koru.com/', 'korunacak');
+  for (const metin of ['', '   ', null]) {
+    await assert.rejects(() => S.guncelle(n.id, { metin }), /metin-gerekli/);
+    assert.equal((await S.notuAl(n.id)).metin, 'korunacak');
+  }
+});
 await test('gorunurMu: gizleme süresi geçmişse görünür', () => {
   const gecmis = { gizleUntil: Date.now() - 10 };
   const gelecek = { gizleUntil: Date.now() + 10000 };
