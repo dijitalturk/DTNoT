@@ -114,6 +114,8 @@ const ISLER = {
     return {
       anahtar: s.anahtar, tumu: s.tumu,
       postit: s.postit, banner: s.banner, footer: s.footer, etiket: s.etiket,
+      sonrakiGosterim: S.sayfaNotlari(store, m.url || m.anahtar || '', Number.MAX_SAFE_INTEGER).tumu
+        .reduce((enErken, n) => n.gizleUntil > Date.now() && (!enErken || n.gizleUntil < enErken) ? n.gizleUntil : enErken, 0),
     };
   },
   async NOT_EKLE(m) {
@@ -170,10 +172,21 @@ const ISLER = {
   async MENU_YENILE() { await menuKur(); return { ok: true }; },
 };
 
+// Depo işlemleri oku/değiştir/yaz yapar: eşzamanlı yazılar birbirini ezmemeli.
+const YAZAN_ISLER = new Set(['NOT_EKLE', 'NOT_GUNCELLE', 'NOT_SIL', 'ICE_AKTAR', 'AYARLAR_KAYDET']);
+let yazmaSirasi = Promise.resolve();
+function calistir(mesaj) {
+  const is = () => ISLER[mesaj.tip](mesaj);
+  if (!YAZAN_ISLER.has(mesaj.tip)) return is();
+  const sonuc = yazmaSirasi.then(is);
+  yazmaSirasi = sonuc.catch(() => {});
+  return sonuc;
+}
+
 if (chrome.runtime && chrome.runtime.onMessage) {
   chrome.runtime.onMessage.addListener((mesaj, gonderen, yanitla) => {
     if (!mesaj || !mesaj.tip || !Object.prototype.hasOwnProperty.call(ISLER, mesaj.tip)) return undefined;
-    ISLER[mesaj.tip](mesaj)
+    calistir(mesaj)
       .then((sonuc) => { try { yanitla(sonuc); } catch (e) { /* kanal kapanmış */ } })
       .catch((hata) => {
         try { yanitla({ __hata: String((hata && hata.message) || hata) }); } catch (e) { /* yut */ }

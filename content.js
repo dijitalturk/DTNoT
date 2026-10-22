@@ -44,6 +44,7 @@
   let calisiyor = false;
   let yenileBekliyor = false;
   let postitRO = null;
+  let gosterimZamani = null;
   let bannerYuksek = 0;   // sayfaya eklenen üst boşluk
   let footerYuksek = 0;   // sayfaya eklenen alt boşluk
   let bannerRO = null;
@@ -122,6 +123,7 @@
     return {
       postit: r.postit || [], banner: r.banner || [],
       footer: r.footer || [], etiket: r.etiket || [], tumu: r.tumu || [],
+      sonrakiGosterim: Number(r.sonrakiGosterim) || 0,
     };
   }
 
@@ -535,7 +537,11 @@
     const musait = (x, y) => sigar(x, y) && !(dolu || []).some((b) => kutuCakisir(kutuYap(x, y, w, h), b));
 
     const denemeler = [];
-    if (aday) denemeler.push([Math.round(aday.left), Math.round(aday.top)]);
+    if (aday) {
+      const x = Math.min(Math.max(0, Math.round(aday.left)), Math.max(0, vw - w));
+      const y = Math.min(Math.max(0, Math.round(aday.top)), Math.max(0, vh - h));
+      if (musait(x, y)) return { sol: x, ust: y };
+    }
     const hedefX = aday ? aday.left : 16;
     const hedefY = aday ? aday.top : (vh - h - 16);
     (dolu || []).slice().sort((a, b) =>
@@ -547,11 +553,13 @@
       denemeler.push([Math.round(b.sol), Math.round(b.ust - h - ARALIK)]);      // ÜSTÜ
       denemeler.push([Math.round(b.sol - w - ARALIK), Math.round(b.ust)]);      // SOLU
     });
-    for (let y = vh - h - 16; y >= 4; y -= (h + ARALIK)) {
-      for (let x = 16; x + w <= vw - 4; x += (w + ARALIK)) denemeler.push([Math.round(x), Math.round(y)]);
+    for (const [x, y] of denemeler) {
+      if (musait(x, y)) return { sol: x, ust: y };
     }
-    for (let i = 0; i < denemeler.length; i += 1) {
-      if (musait(denemeler[i][0], denemeler[i][1])) return { sol: denemeler[i][0], ust: denemeler[i][1] };
+    for (let y = vh - h - 16; y >= 4; y -= (h + ARALIK)) {
+      for (let x = 16; x + w <= vw - 4; x += (w + ARALIK)) {
+        if (musait(Math.round(x), Math.round(y))) return { sol: Math.round(x), ust: Math.round(y) };
+      }
     }
     // Hiç boş yer yoksa: adayı görünür alana sıkıştır (üst üste binse bile ekran dışına taşma).
     const x = aday ? aday.left : 16;
@@ -830,8 +838,10 @@
       if (!anahtar) { bannerKaldir(); kaldir(KOK_ID); imza = ''; return; }
       const veri = await sayfaNotlariniSor();
       if (!veri) return; // Geçici bağlantı hatası mevcut notları kaldırmamalı.
+      clearTimeout(gosterimZamani);
+      if (veri.sonrakiGosterim) gosterimZamani = setTimeout(degerlendir, Math.min(2147483647, Math.max(1, veri.sonrakiGosterim - Date.now())));
       const yeniImza = notImzasi(veri.tumu);
-      if (yeniImza === imza && document.getElementById(KOK_ID)) return;
+      if (veri.tumu.length && yeniImza === imza && document.getElementById(KOK_ID)) return;
       imza = yeniImza;
 
       if (!veri.tumu.length) { bannerKaldir(); kaldir(KOK_ID); return; }
@@ -932,7 +942,7 @@
   }
 
   /* Konum değişimi (SPA) + sayfa geri gelme olayları */
-  let sonKonum = null;
+  let sonKonum = S.normalizeUrl(location.href);
   function konumDegistiMi() {
     const anahtar = S.normalizeUrl(location.href);
     if (anahtar !== sonKonum) {
@@ -941,7 +951,7 @@
       degerlendir();
       return;
     }
-    if (!document.getElementById(KOK_ID)) degerlendir();
+    if (imza && !document.getElementById(KOK_ID)) degerlendir();
   }
 
   try {
@@ -966,8 +976,10 @@
   try {
     chrome.storage.onChanged.addListener(function (degisim, alan) {
       if (alan !== 'local') return;
-      if ('web-not-store' in degisim || 'web-not-settings' in degisim) {
+      if ('web-not-settings' in degisim) {
         ayarlariTazele().then(function () { imza = ''; return degerlendir(); });
+      } else if ('web-not-store' in degisim) {
+        degerlendir();
       }
     });
   } catch (e) { /* dinleyici yoksa poll yeter */ }
