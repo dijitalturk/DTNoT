@@ -401,17 +401,13 @@
 
   /* ---------- Başlat ---------- */
   (async () => {
-    await I.hazirla();
     const TM = globalThis.DTNOT_TEMA;
-    if (TM) await TM.hazirla(); // kayıtlı tema (kök elemanda `db-acik`)
+    await Promise.all([I.hazirla(), TM ? TM.hazirla() : Promise.resolve()]); // kayıtlı tema (kök elemanda `db-acik`)
     etiketle();
     katlanirlariKur(); // Ayarlar bölümleri: varsayılan açık/kapalı hâlleri data-acik'tan
     // Tema seçici: ORTAK render yolu (assets/tema.js) — sayfada kopya kod yok.
     if (TM) TM.seciciKur($('tema'), () => bildir(T('popup.kaydedildi'), 'tamam'));
     ekleModu(false);
-    await tazele();
-    await ayarlariYukle();
-    if (await bekleyeniTüket()) ekleModu(true);
 
     $('ekleAc').addEventListener('click', () => ekleModu($('ekleKutu').hidden));
     $('siteGeneliChk').addEventListener('change', (e) => { form.siteGeneli = e.target.checked; });
@@ -443,6 +439,9 @@
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) kaydet();
     });
     I.abone(() => { etiketle(); ciz(); ozetYaz(); });
+    // Kontroller veri yüklenmesini beklemeden kullanılabilir olsun.
+    await Promise.all([tazele(), ayarlariYukle()]);
+    if (await bekleyeniTüket()) ekleModu(true);
     // Depo başka yerden değişirse (panel/başka sekme) liste tazelensin
     try {
       chrome.storage.onChanged.addListener((degisim, alan) => {

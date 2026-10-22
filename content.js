@@ -14,6 +14,9 @@
 
   try { if (window.top !== window.self) return; } catch (e) { return; } // yalnız üst pencere
 
+  if (globalThis.__dtnotContentLoaded) return;
+  globalThis.__dtnotContentLoaded = true;
+
   const S = globalThis.DTNOT_STORE;
   const I = globalThis.DTNOT_I18N;
   const t = (k, v) => (I ? I.t(k, v) : k);
@@ -39,6 +42,9 @@
   let gizleMs = 3600 * 1000;
   let imza = '';          // çizilen hâlin imzası (aynıysa yeniden çizilmez → sürükleme bozulmaz)
   let calisiyor = false;
+  let yenileBekliyor = false;
+  let postitRO = null;
+  let gosterimZamani = null;
   let bannerYuksek = 0;   // sayfaya eklenen üst boşluk
   let footerYuksek = 0;   // sayfaya eklenen alt boşluk
   let bannerRO = null;
@@ -79,6 +85,7 @@
   }
 
   function izlemeyiBirak() {
+    if (postitRO) { postitRO.disconnect(); postitRO = null; }
     if (bannerRO) { try { bannerRO.disconnect(); } catch (e) { /* yut */ } bannerRO = null; }
     if (footerRO) { try { footerRO.disconnect(); } catch (e) { /* yut */ } footerRO = null; }
     // Ölçüm için eklenen resize dinleyicileri birikmesin (her yeniden çizimde temizlenir).
@@ -111,17 +118,18 @@
   }
 
   async function sayfaNotlariniSor() {
-    const bos = { postit: [], banner: [], footer: [], etiket: [], tumu: [] };
     const r = await mesaj('SAYFA_NOTLARI', { url: location.href });
-    if (!r) return bos;
+    if (!r) return null;
     return {
       postit: r.postit || [], banner: r.banner || [],
       footer: r.footer || [], etiket: r.etiket || [], tumu: r.tumu || [],
+      sonrakiGosterim: Number(r.sonrakiGosterim) || 0,
     };
   }
 
   /* ---------- Gölge kök + ortak parçalar ---------- */
   function golgeOlustur() {
+    izlemeyiBirak();
     kaldir(KOK_ID);
     const barindirici = document.createElement('div');
     barindirici.id = KOK_ID;
@@ -164,6 +172,9 @@
       + ' background: var(--bg); color: var(--metin); border: 1px solid var(--kenar);'
       + ' border-radius: 12px; box-shadow: 0 10px 34px rgba(9,20,45,0.22); padding: 6px 6px 2px;'
       + " font: 13px/1.45 Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overflow-wrap: anywhere; }"
+      + '.kutu { max-width: 100vw; max-height: 100vh; overflow: auto; }'
+      + '.bannerlar, .footerlar { max-height: 100vh; overflow: auto; }'
+      + '.kose__menu { max-width: calc(100vw - 24px); max-height: calc(100vh - 24px); overflow: auto; }'
       + '.bas { display: flex; align-items: center; justify-content: flex-end; gap: 4px; cursor: grab; touch-action: none; }'
       + '.bas.tut { cursor: grabbing; }'
       + '.tutamak { margin-right: auto; font-size: 12px; color: var(--ikon); opacity: .7; padding-left: 5px; letter-spacing: -1px; }'
@@ -265,7 +276,7 @@
 
   /* ---------- Ortak çizim parçaları ---------- */
   /** ✎ düğmesi + açılır menü (Düzenle / Sil). `duzenle` çağrısı düzenleyiciyi açar. */
-  function menuKur(not, kap, duzenle) {
+  function menuKur(not, kap, duzenle, degisti = () => {}) {
     const menu = document.createElement('div');
     menu.className = 'menu';
     menu.hidden = true;
@@ -275,7 +286,7 @@
     edit.className = 'menu__og';
     edit.dataset.eylem = 'duzenle';
     edit.textContent = t('ortak.duzenle');
-    edit.addEventListener('click', () => { menu.hidden = true; duzenle(); });
+    edit.addEventListener('click', () => { menu.hidden = true; duzenle(); degisti(); });
 
     const sil = document.createElement('button');
     sil.type = 'button';
@@ -284,17 +295,26 @@
     sil.textContent = t('ortak.sil');
     sil.addEventListener('click', async () => {
       menu.hidden = true;
+      degisti();
       if (await silOnayi(not)) { imza = ''; await degerlendir(); }
     });
 
     menu.appendChild(edit);
     menu.appendChild(sil);
+    const vazgec = document.createElement('button');
+    vazgec.type = 'button';
+    vazgec.className = 'menu__og';
+    vazgec.dataset.eylem = 'vazgec';
+    vazgec.textContent = t('ortak.vazgec');
+    vazgec.addEventListener('click', () => { menu.hidden = true; degisti(); });
+    menu.appendChild(vazgec);
 
     const dugme = ikonDugme(t('icerik.duzenle'), '\u270e');
     dugme.dataset.eylem = 'menu';
     dugme.addEventListener('click', (e) => {
       e.stopPropagation();
       menu.hidden = !menu.hidden;
+      degisti();
     });
     kap.appendChild(dugme);
     return { dugme: dugme, menu: menu };
@@ -386,10 +406,16 @@
     kaydet.className = 'dug dug--kaydet';
     kaydet.dataset.eylem = 'kaydet';
     kaydet.textContent = t('ortak.kaydet');
+    const hata = document.createElement('div');
+    hata.setAttribute('role', 'alert');
+    kap.appendChild(hata);
     kaydet.addEventListener('click', async () => {
       const metin = String(alan.value || '');
       if (!metin.trim()) return;
-      await kaydetVeTazele(not.id, {
+      if (kaydet.disabled) return;
+      kaydet.disabled = true;
+      hata.textContent = '';
+      const basarili = await kaydetVeTazele(not.id, {
         metin: metin,
         renk: yerel.renk,
         gorunum: yerel.gorunum,
@@ -397,6 +423,9 @@
         kucuk: false,
         gizleUntil: 0,
       });
+      kaydet.disabled = false;
+      if (basarili) kapat();
+      else hata.textContent = t('popup.kaydetHata');
     });
     const vazgec = document.createElement('button');
     vazgec.type = 'button';
@@ -508,7 +537,11 @@
     const musait = (x, y) => sigar(x, y) && !(dolu || []).some((b) => kutuCakisir(kutuYap(x, y, w, h), b));
 
     const denemeler = [];
-    if (aday) denemeler.push([Math.round(aday.left), Math.round(aday.top)]);
+    if (aday) {
+      const x = Math.min(Math.max(0, Math.round(aday.left)), Math.max(0, vw - w));
+      const y = Math.min(Math.max(0, Math.round(aday.top)), Math.max(0, vh - h));
+      if (musait(x, y)) return { sol: x, ust: y };
+    }
     const hedefX = aday ? aday.left : 16;
     const hedefY = aday ? aday.top : (vh - h - 16);
     (dolu || []).slice().sort((a, b) =>
@@ -520,11 +553,13 @@
       denemeler.push([Math.round(b.sol), Math.round(b.ust - h - ARALIK)]);      // ÜSTÜ
       denemeler.push([Math.round(b.sol - w - ARALIK), Math.round(b.ust)]);      // SOLU
     });
-    for (let y = vh - h - 16; y >= 4; y -= (h + ARALIK)) {
-      for (let x = 16; x + w <= vw - 4; x += (w + ARALIK)) denemeler.push([Math.round(x), Math.round(y)]);
+    for (const [x, y] of denemeler) {
+      if (musait(x, y)) return { sol: x, ust: y };
     }
-    for (let i = 0; i < denemeler.length; i += 1) {
-      if (musait(denemeler[i][0], denemeler[i][1])) return { sol: denemeler[i][0], ust: denemeler[i][1] };
+    for (let y = vh - h - 16; y >= 4; y -= (h + ARALIK)) {
+      for (let x = 16; x + w <= vw - 4; x += (w + ARALIK)) {
+        if (musait(Math.round(x), Math.round(y))) return { sol: Math.round(x), ust: Math.round(y) };
+      }
     }
     // Hiç boş yer yoksa: adayı görünür alana sıkıştır (üst üste binse bile ekran dışına taşma).
     const x = aday ? aday.left : 16;
@@ -539,6 +574,20 @@
   function eskidenYeniye(liste) {
     return (liste || []).slice().sort((a, b) =>
       ((Number(a.olusturma) || 0) - (Number(b.olusturma) || 0)) || String(a.id).localeCompare(String(b.id)));
+  }
+
+  // Menü/editör büyüdüğünde mevcut kartı görünür alana taşı; taslağı yeniden çizme.
+  function postitSigdir(el, id) {
+    if (!el.isConnected) return;
+    const r = el.getBoundingClientRect();
+    const sol = Math.min(Math.max(0, r.left), Math.max(0, window.innerWidth - r.width));
+    const ust = Math.min(Math.max(0, r.top), Math.max(0, window.innerHeight - r.height));
+    el.style.left = sol + 'px';
+    el.style.top = ust + 'px';
+    el.style.bottom = 'auto';
+    const i = yerlesim.findIndex((b) => b.id === id);
+    const kutu = kutuYap(sol, ust, r.width, r.height, id);
+    if (i < 0) yerlesim.push(kutu); else yerlesim[i] = kutu;
   }
 
   /* ---------------- POST-IT (sürüklenebilir, görünümü değiştirilebilir) ---------------- */
@@ -603,6 +652,7 @@
         duzenAcik = false;
         duzenKap.hidden = true;
         govde.hidden = false;
+        postitSigdir(kutu, not.id);
       }));
     };
 
@@ -614,7 +664,7 @@
       degerlendir();
     });
 
-    const menu = menuKur(not, bas, duzenle);
+    const menu = menuKur(not, bas, duzenle, () => postitSigdir(kutu, not.id));
     bas.appendChild(menu.dugme);
     bas.appendChild(kapat);
 
@@ -748,7 +798,7 @@
     // Düğmeler şeridin SAĞ UCUNDA mutlak konumda: metin tam ORTADA kalsın.
     const dugmeler = document.createElement('div');
     dugmeler.className = 'kose__dugme';
-    const menu = menuKur(not, dugmeler, duzenle);
+    const menu = menuKur(not, dugmeler, duzenle, gorunumGuncelle);
     menu.dugme.classList.add('ikon--mini');
     // Menü DOĞRUDAN karta girer (araya sarmalayıcı yok) + görünürlüğü bağlanır.
     menu.dugme.addEventListener('click', gorunumGuncelle);
@@ -781,19 +831,36 @@
   }
 
   async function degerlendir() {
-    if (calisiyor) return;
+    if (calisiyor) { yenileBekliyor = true; return; }
     calisiyor = true;
     try {
       const anahtar = S.normalizeUrl(location.href);
       if (!anahtar) { bannerKaldir(); kaldir(KOK_ID); imza = ''; return; }
       const veri = await sayfaNotlariniSor();
+      if (!veri) return; // Geçici bağlantı hatası mevcut notları kaldırmamalı.
+      clearTimeout(gosterimZamani);
+      if (veri.sonrakiGosterim) gosterimZamani = setTimeout(degerlendir, Math.min(2147483647, Math.max(1, veri.sonrakiGosterim - Date.now())));
       const yeniImza = notImzasi(veri.tumu);
-      if (yeniImza === imza && document.getElementById(KOK_ID)) return;
+      if (veri.tumu.length && yeniImza === imza && document.getElementById(KOK_ID)) return;
       imza = yeniImza;
 
       if (!veri.tumu.length) { bannerKaldir(); kaldir(KOK_ID); return; }
 
+      // Aynı sayfada kalan kartların gerçek konumlarını koru. Silme/ekleme sırasında
+      // baştan yerleştirmek, kayıtlı konumu olmayan kartları başka boşluklara taşır.
+      const oncekiKonumlar = new Map();
+      const oncekiKok = document.getElementById(KOK_ID);
+      if (oncekiKok && oncekiKok.dataset.anahtar === anahtar && oncekiKok.shadowRoot) {
+        oncekiKok.shadowRoot.querySelectorAll('[data-not-id]').forEach((el) => {
+          const r = el.getBoundingClientRect();
+          oncekiKonumlar.set(el.dataset.notId, {
+            left: r.left, top: r.top, width: r.width, height: r.height,
+            kucuk: el.classList.contains('mini'),
+          });
+        });
+      }
       const golge = golgeOlustur();
+      golge.host.dataset.anahtar = anahtar;
       kapliBolge = [];
       yerlesim = [];
       const bolgeEkle = (el) => {
@@ -838,16 +905,32 @@
       // 4) POST-IT'ler: eskiden yeniye yerleştir → yeni not mevcudun SAĞINA oturur,
       //    hiçbiri diğerinin (ya da şeritlerin) üstüne binmez.
       if (veri.postit.length) {
+        if (globalThis.ResizeObserver) postitRO = new ResizeObserver((entries) => {
+          entries.forEach(({ target }) => postitSigdir(target, target.dataset.notId));
+        });
         const kap = document.createElement('div');
         kap.id = POSTIT_ID;
         golge.appendChild(kap);
-        eskidenYeniye(veri.postit).forEach((n) => {
+        const kartlar = eskidenYeniye(veri.postit).map((n) => {
           const el = cizPostit(n);
+          el.dataset.notId = n.id;
           kap.appendChild(el);
-          // Öğe artık yerleşimde → GERÇEK ölçüyle çakışmasız konum bulunur.
+          if (postitRO) postitRO.observe(el);
           const w = el.offsetWidth || (n.kucuk === true ? 44 : 264);
           const h = el.offsetHeight || (n.kucuk === true ? 44 : 110);
-          const yer = yerBul(kapliBolge.concat(yerlesim), w, h, konumPx(n, w, h));
+          const onceki = oncekiKonumlar.get(n.id);
+          const ayniTur = !!onceki && onceki.kucuk === (n.kucuk === true);
+          const koru = ayniTur && Math.abs(onceki.width - w) < 1 && Math.abs(onceki.height - h) < 1
+            && !kapliBolge.some((b) => kutuCakisir(kutuYap(onceki.left, onceki.top, w, h, n.id), b));
+          return { n, el, w, h, onceki: ayniTur ? onceki : null, koru };
+        });
+        // Değişmeyen kartların yerlerini önce ayır; yeni/boyutu değişen kartlar
+        // bu alanları boş sanıp mevcut bir notu yerinden etmesin.
+        kartlar.sort((a, b) => Number(b.koru) - Number(a.koru)).forEach(({ n, el, w, h, onceki, koru }) => {
+          const yer = koru ? {
+            sol: Math.min(Math.max(0, onceki.left), Math.max(0, window.innerWidth - w)),
+            ust: Math.min(Math.max(0, onceki.top), Math.max(0, window.innerHeight - h)),
+          } : yerBul(kapliBolge.concat(yerlesim), w, h, onceki || konumPx(n, w, h));
           el.style.left = yer.sol + 'px';
           el.style.top = yer.ust + 'px';
           el.style.bottom = 'auto';
@@ -856,6 +939,7 @@
       }
     } finally {
       calisiyor = false;
+      if (yenileBekliyor) { yenileBekliyor = false; await degerlendir(); }
     }
   }
 
@@ -883,7 +967,7 @@
   }
 
   /* Konum değişimi (SPA) + sayfa geri gelme olayları */
-  let sonKonum = null;
+  let sonKonum = S.normalizeUrl(location.href);
   function konumDegistiMi() {
     const anahtar = S.normalizeUrl(location.href);
     if (anahtar !== sonKonum) {
@@ -892,7 +976,7 @@
       degerlendir();
       return;
     }
-    if (!document.getElementById(KOK_ID)) degerlendir();
+    if (imza && !document.getElementById(KOK_ID)) degerlendir();
   }
 
   try {
@@ -904,17 +988,23 @@
 
   window.addEventListener('popstate', konumDegistiMi);
   window.addEventListener('hashchange', konumDegistiMi);
-  window.addEventListener('focus', function () { imza = ''; degerlendir(); });
-  window.addEventListener('pageshow', function () { imza = ''; degerlendir(); });
-  window.addEventListener('resize', function () { imza = ''; degerlendir(); });
-  document.addEventListener('visibilitychange', function () { if (!document.hidden) { imza = ''; degerlendir(); } });
+  window.addEventListener('focus', function () { degerlendir(); });
+  window.addEventListener('pageshow', function () { degerlendir(); });
+  window.addEventListener('resize', function () {
+    const kok = document.getElementById(KOK_ID);
+    if (kok && kok.shadowRoot) kok.shadowRoot.querySelectorAll('[data-not-id]').forEach((el) => postitSigdir(el, el.dataset.notId));
+    degerlendir();
+  });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) degerlendir(); });
   setInterval(konumDegistiMi, 2500); // yedek yoklama (SPA + geç yüklenen içerik)
 
   try {
     chrome.storage.onChanged.addListener(function (degisim, alan) {
       if (alan !== 'local') return;
-      if ('web-not-store' in degisim || 'web-not-settings' in degisim) {
+      if ('web-not-settings' in degisim) {
         ayarlariTazele().then(function () { imza = ''; return degerlendir(); });
+      } else if ('web-not-store' in degisim) {
+        degerlendir();
       }
     });
   } catch (e) { /* dinleyici yoksa poll yeter */ }
