@@ -11,6 +11,45 @@ const fs=require('node:fs');const os=require('node:os');const path=require('node
  context.setDefaultTimeout(5000);
  const page=await context.newPage();await page.route('https://example.com/**',r=>r.fulfill({contentType:'text/html',body:'<html><body>Extension test</body></html>'}));await page.goto('https://example.com/');
  await worker.evaluate(async()=>{await icerikEsle();});await page.reload();
+ // Position regression: both dragged and automatically placed survivors stay put.
+ const cardFor=id=>page.locator(`[data-not-id="${id}"]`);
+ async function dragCard(id,x,y) {
+   const handle=await cardFor(id).locator('.tutamak').boundingBox();
+   await page.mouse.move(handle.x+5,handle.y+5);await page.mouse.down();
+   await page.mouse.move(x,y,{steps:8});await page.mouse.up();
+   const saved=await worker.evaluate(async id=>{for(let i=0;i<100;i++){const n=await S.notuAl(id);if(n.konum)return n.konum;await new Promise(r=>setTimeout(r,20));}return null;},id);
+   assert(saved,'Dragged position must be persisted');
+ }
+ async function samePosition(id,before) {
+   const after=await cardFor(id).boundingBox();
+   assert(after && Math.abs(after.x-before.x)<=1 && Math.abs(after.y-before.y)<=1,
+     `Survivor moved: ${JSON.stringify({before,after})}`);
+ }
+ page.on('dialog',dialog=>dialog.accept());
+ for(const mode of ['automatic survivor','dragged first survivor','dragged last survivor']) {
+   const first=await worker.evaluate(()=>S.ekle('https://example.com/','Position first'));
+   await cardFor(first.id).waitFor();await dragCard(first.id,620,150);
+   const firstPosition=await cardFor(first.id).boundingBox();
+   const second=await worker.evaluate(()=>S.ekle('https://example.com/','Position second'));
+   await cardFor(second.id).waitFor();await samePosition(first.id,firstPosition);
+   const third=await worker.evaluate(()=>S.ekle('https://example.com/','Position third'));
+   await cardFor(third.id).waitFor();await samePosition(first.id,firstPosition);
+   if(mode==='dragged last survivor') await dragCard(third.id,300,400);
+   const survivor=mode==='dragged first survivor'?first:third;
+   const before=await cardFor(survivor.id).boundingBox();
+   for(const removed of [first,second,third].filter(n=>n.id!==survivor.id)) {
+     await cardFor(removed.id).locator('[data-eylem=menu]').click();
+     await cardFor(removed.id).locator('[data-eylem=sil]').click();
+     await cardFor(removed.id).waitFor({state:'detached'});
+     await samePosition(survivor.id,before);
+   }
+   if(mode!=='automatic survivor') {
+     await page.reload();await cardFor(survivor.id).waitFor();await samePosition(survivor.id,before);
+   }
+   await worker.evaluate(async()=>{const notes=(await S.hepsiniAl()).notlar;for(const n of notes) await S.sil(n.id);});
+   await page.locator('#dtnot-kok').waitFor({state:'detached'});
+   console.log('PASS stable position:',mode);
+ }
  await worker.evaluate(async()=>{await S.ekle('https://example.com/','Regression note',{konum:{x:0,y:1}})});
  await page.locator('.kutu').waitFor();
  const errors=[];page.on('pageerror',e=>errors.push(e.message));

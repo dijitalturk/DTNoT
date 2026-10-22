@@ -846,7 +846,21 @@
 
       if (!veri.tumu.length) { bannerKaldir(); kaldir(KOK_ID); return; }
 
+      // Aynı sayfada kalan kartların gerçek konumlarını koru. Silme/ekleme sırasında
+      // baştan yerleştirmek, kayıtlı konumu olmayan kartları başka boşluklara taşır.
+      const oncekiKonumlar = new Map();
+      const oncekiKok = document.getElementById(KOK_ID);
+      if (oncekiKok && oncekiKok.dataset.anahtar === anahtar && oncekiKok.shadowRoot) {
+        oncekiKok.shadowRoot.querySelectorAll('[data-not-id]').forEach((el) => {
+          const r = el.getBoundingClientRect();
+          oncekiKonumlar.set(el.dataset.notId, {
+            left: r.left, top: r.top, width: r.width, height: r.height,
+            kucuk: el.classList.contains('mini'),
+          });
+        });
+      }
       const golge = golgeOlustur();
+      golge.host.dataset.anahtar = anahtar;
       kapliBolge = [];
       yerlesim = [];
       const bolgeEkle = (el) => {
@@ -897,15 +911,26 @@
         const kap = document.createElement('div');
         kap.id = POSTIT_ID;
         golge.appendChild(kap);
-        eskidenYeniye(veri.postit).forEach((n) => {
+        const kartlar = eskidenYeniye(veri.postit).map((n) => {
           const el = cizPostit(n);
           el.dataset.notId = n.id;
           kap.appendChild(el);
           if (postitRO) postitRO.observe(el);
-          // Öğe artık yerleşimde → GERÇEK ölçüyle çakışmasız konum bulunur.
           const w = el.offsetWidth || (n.kucuk === true ? 44 : 264);
           const h = el.offsetHeight || (n.kucuk === true ? 44 : 110);
-          const yer = yerBul(kapliBolge.concat(yerlesim), w, h, konumPx(n, w, h));
+          const onceki = oncekiKonumlar.get(n.id);
+          const ayniTur = !!onceki && onceki.kucuk === (n.kucuk === true);
+          const koru = ayniTur && Math.abs(onceki.width - w) < 1 && Math.abs(onceki.height - h) < 1
+            && !kapliBolge.some((b) => kutuCakisir(kutuYap(onceki.left, onceki.top, w, h, n.id), b));
+          return { n, el, w, h, onceki: ayniTur ? onceki : null, koru };
+        });
+        // Değişmeyen kartların yerlerini önce ayır; yeni/boyutu değişen kartlar
+        // bu alanları boş sanıp mevcut bir notu yerinden etmesin.
+        kartlar.sort((a, b) => Number(b.koru) - Number(a.koru)).forEach(({ n, el, w, h, onceki, koru }) => {
+          const yer = koru ? {
+            sol: Math.min(Math.max(0, onceki.left), Math.max(0, window.innerWidth - w)),
+            ust: Math.min(Math.max(0, onceki.top), Math.max(0, window.innerHeight - h)),
+          } : yerBul(kapliBolge.concat(yerlesim), w, h, onceki || konumPx(n, w, h));
           el.style.left = yer.sol + 'px';
           el.style.top = yer.ust + 'px';
           el.style.bottom = 'auto';
