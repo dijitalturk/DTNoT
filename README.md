@@ -9,7 +9,12 @@ UX, kardeş proje **DTAI Tool**'un tasarım sistemi üzerine kuruldu (tek tip bi
 TR/EN bayraklı dil değişimi, ayrı panel ve ayarlar sayfaları).
 
 > **Kaynak:** `web-note-extension` (React 18 + TypeScript + Vite + `@crxjs`) taslağından portlandı.
-> Gerekçe ve ölçümler: `docs/INCELEME-2026-09-21.md`. Taslağın kopyası `gelen-kaynak/` altında duruyor.
+> Gerekçe ve ölçümler: `docs/INCELEME-2026-09-21.md`.
+
+## Lisans
+
+[MIT](LICENSE) © 2026 Ahmet Veysel Toplu (DijitalTurk) — kodu serbestçe kullanabilir,
+değiştirebilir ve dağıtabilirsiniz; yalnızca bu telif/lisans bildirimini korumanız yeterlidir.
 
 ## Kurulum
 
